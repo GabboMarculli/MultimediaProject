@@ -1,0 +1,2 @@
+1) Chiedere al prof se le elaborazioni tipo la rimozione di stopword, caratteri speciali ecc va fatta prima di inserire i documenti nella collection: in caso di risposta affermativa
+   se l'utente effettuasse una ricerca del tipo 11/9/2001, vorrebbe probabilmente vedere le torri gemelle come risultato, ma nella rimozione dei caratteri speciali verrebbe probabilmente aterato il risultato
