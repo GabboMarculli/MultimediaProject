@@ -6,3 +6,67 @@
 frequenze codifiche unary 
 docid codifiche gamma
 Mettere frequenze e docid su due file diversi
+
+
+
+2) Intanto va capita che dimensione può avere il lexicon, questo già lo potremmo approssimare con la Heaps Law. 
+Una volta approssimato quanti termini più o meno ci sono, andrebbe stimata la lunghezza delle varie posting list, questo
+se ho capito bene andrebbe visto con la Zips Laws.
+Tutto questo perchè?
+
+Secondo me, vista la dimensione 2.2 GB delle collection totali, il lexicon "cosi a braccio" sarà almeno almeno 1 GB tutto (vedi esercizio 3) e non possiamo  caricare interamente in memoria, o meglio possiamo anche farlo.. ma al crescere dei termini ci schianterebbe il gozzo e sarebbe anche lento da leggere tutto.
+Inoltre non possiamo nemmeno provare a tenerci associata la posting list a ciascun termine, perchè come detto anche alle ultime lezioni è questa quella che avrà sicuramente più peso di tutti. Per cui la salverei in un file esterno o meglio in diversi file esterni.. 
+Questo file avrà delle dimensioni esorbitanti e pertanto dobbiamo usare le 2° legge per dividerlo in parti uguali, proprio come farebbe un vero motore di ricerca, in questo modo ogni volta che andiamo a ricercare un termine per la valutazione 
+Struttura del lexicon:
+key-value
+key="term"
+value = posizione/puntatore del termine all'interno del lexicon es. considerando che ogni blocco di file avrà  N/
+
+
+1) prima leggiamo il lexicon termine per termine andiamo a crearci un indice su un file relativo  index_1 splittato (eventuali compressioni ci pensiamo in un secondo momento) etc..
+alla fine dovremmo avere un indice splittato in tanti file di testo 
+
+es. 
+index_1.txt
+index_2.txt
+index_3.txt
+index_4.txt
+index_5.txt
+
+
+
+
+
+
+
+2) quando si cerca un termine quindi si legge il lexicon e si legge il valore del file di testo da leggere, pertanto si carica solamente quel file in memoria RAM, più piccolo è più veloce e più performante sarà la ricerca.
+
+
+
+
+#Per la costruzione dell'indice prima parte:
+https://www.youtube.com/watch?v=uXq4aq51eKE
+
+Idee per creazione indice:
+
+Cose assolutamente vere
+
+*) l'intera lista dei documenti pre-processati deve essere attraversata interamente, per forza.
+**) Che succede se il lexicon cresce? Tutto in memoria non può stare, la creazione dell'indice deve essere per forza di cose generica e PARALLELIZZABILE, anche se noi andremo a farla su un solo calcolatore.
+
+
+
+1) più SEMPLICE supponendo che tutto il lexicon possa stare in memoria
+- per ogni documento che arriva mi conto ciascun termine quante volte appare
+- per ogni termine calcolato accedo nel lexicon e aggiungo posizione "puntatore" e un posting con il docId, freq
+- con una certa frequenza vado a svuotare ed appendere sul disco
+
+
+2) Blocked based indexing - SPMI con multi-merge sort
+- Dopo aver fatto una conta approssimativa di quanti token ci sono nel lexicon N, si decide la dimensione di un blocco B<<N.
+- Finche non ho elaborato tutti i documenti
+- Per ogni documento che arriva mi conto ciascun termine quante volte appare
+- Per ogni termine calcolato accedo nel lexicon in MEMORIA e aggiungo posizione "puntatore" e un posting con il docId, freq
+- Se il blocco supera la dimensione prefissata B, salvalo sul DISCO e procedi ripulendo la struttura in MEMORIA.
+- Apro in parallelo tutti i blocchi e vado a fare il merge usando delle code prioritarie generando un unico file di output
+
