@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[3]:
 
 
 import ipytest
@@ -19,7 +19,7 @@ from collections import Counter, defaultdict,OrderedDict
 from dataclasses import dataclass
 
 
-# In[2]:
+# In[4]:
 
 
 # Since this is a simple data class, intializing it can be abstracted with
@@ -85,12 +85,16 @@ class InvertedIndex:
         return self._index
 
 
-# In[3]:
+# In[5]:
 
 
 class IndexBuilder:
     
     MAX_CHARATER=chr(1114111)
+    
+    OUTPUT_FILE_FORMAT=".txt"
+    NAME_DOC_IDS_FILE="docIds"
+    NAME_TERM_FREQ_FILE="termFreq"
     
     def __init__(self):
         print ("Index Builder costructor")
@@ -107,14 +111,16 @@ class IndexBuilder:
         return invertedIndex
 
 
-    def build_block_sort_base_indexing(self,list_of_documents:list,output_file_name:str,block_size: int=2200,delete_intermediete_results:bool=True)-> None:
+    def build_block_sort_base_indexing(self,list_of_documents:list,output_file_name:str,block_size: int=2200,split_results_in_files:bool=False, delete_intermediete_results:bool=True)-> None:
         """ Given a list of document, build an Inverted Index exploiting both Memory(RAM) at blocks and Disk. 
             It saves the entire structure on disk at location output_file_name.
+            The file structure is like term doc_id:term_freq
                
          Args:
             list_of_documents: List of document to be processed.
             output_file_name: The location of where the structure is saved.
             block_size: The size of the block to elaborate in main memory and store on disk as intermediate result.
+            split_results_in_files: Specify if you want or not the inderted index in two different files: the doc_ids file and the term_freq file
             delete_intermediete_results: Flag to remove partial results at the end of the procedure or not.
          
         """
@@ -129,8 +135,16 @@ class IndexBuilder:
 
         os.makedirs(DIR_FOLDER)
 
-        if os.path.exists(output_file_name):
-            os.remove(output_file_name)
+    
+        if (split_results_in_files):
+            if os.path.exists(output_file_name+"_"+self.NAME_DOC_IDS_FILE+self.OUTPUT_FILE_FORMAT):
+                os.remove(output_file_name+"_"+self.NAME_DOC_IDS_FILE+self.OUTPUT_FILE_FORMAT)
+            
+            if os.path.exists(output_file_name+"_"+self.NAME_TERM_FREQ_FILE+self.OUTPUT_FILE_FORMAT):
+                os.remove(output_file_name+"_"+self.NAME_TERM_FREQ_FILE+self.OUTPUT_FILE_FORMAT)
+        else:
+            if os.path.exists(output_file_name+self.OUTPUT_FILE_FORMAT):
+                os.remove(output_file_name+self.OUTPUT_FILE_FORMAT)
     
         #Map phase - read all the documents and write the index at blocks on disk when memory is full, cleaning the memory data structure.
 
@@ -173,7 +187,7 @@ class IndexBuilder:
 
                 #Sorting by doc_id   
                 mergePostings=sorted(mergePostings, key=operator.attrgetter('doc_id'))    
-                self.__write_term_posting_list_to_disk(output_file_name,min_term,mergePostings)
+                self.__write_term_posting_list_to_disk(output_file_name,min_term,mergePostings,split_results_in_files)
 
                 #Advance on reading the files in parallel only for blocks where was present the last min term.
                 lines=[input_files[i].readline().strip() if (min_term==terms[i]) else lines[i] for i in range (0,len(terms))] 
@@ -223,7 +237,7 @@ class IndexBuilder:
             else:
                 current_postings_list.append(posting)
         
-    def __write_term_posting_list_to_disk(self,file_name:str,term:str,merged_postings_list:list):
+    def __write_term_posting_list_to_disk(self,file_name:str,term:str,merged_postings_list:list,split_results_in_files:bool):
         """ This method is used to write in a file on disk in append mode a full entry of the lexicon in the format ex.
             term doc_id_1:term_freq_1 doc_id_2:term_freq_2 doc_id_3:term_freq_3 ... 
             
@@ -231,20 +245,44 @@ class IndexBuilder:
                 file_name: the name of the output file 
                 term: the lexicon term
                 merged_postings_list: the full merged posting list
+                split_results_in_files: Specify if you want or not the inderted index in two different files: the doc_ids file and the term_freq file
         """
+       
         
-        with open(file_name, "a") as f:
-            f.write(term)
-            for posting in merged_postings_list:
-                f.write(f" {posting.doc_id}")
-                if posting.payload:
-                    f.write(f":{str(posting.payload)}")
-            f.write("\n")  
+        if(not split_results_in_files):
+            with open(file_name+self.OUTPUT_FILE_FORMAT, "a") as f:
+                f.write(term)
+                for posting in merged_postings_list:
+                    f.write(f" {posting.doc_id}")
+                    if posting.payload:
+                        f.write(f":{str(posting.payload)}")
+                f.write("\n")
+        else:
+            
+             with open(file_name+"_"+self.NAME_DOC_IDS_FILE+self.OUTPUT_FILE_FORMAT, "a") as f:
+                for index, posting in enumerate(merged_postings_list):
+                    f.write(str(posting.doc_id))
+                    if index != len(merged_postings_list) - 1:
+                        f.write(",")
+                f.write("\n")
+            
+             with open(file_name+"_"+self.NAME_TERM_FREQ_FILE+self.OUTPUT_FILE_FORMAT, "a") as f:
+                for index, posting in enumerate(merged_postings_list):
+                    f.write(str(posting.payload))
+                    if index != len(merged_postings_list) - 1:
+                        f.write(",")
+                f.write("\n")
+
+
+# In[ ]:
+
+
+
 
 
 # # Tests
 
-# In[4]:
+# In[6]:
 
 
 import ipytest
@@ -252,13 +290,13 @@ import ipytest
 ipytest.autoconfig()
 
 
-# In[5]:
+# In[7]:
 
 
 get_ipython().run_cell_magic('ipytest', '', '\n#Test InvertedIndex and Posting datastructures\n\ndef test_inverted_index_data_structure_and_methods():\n    ind = InvertedIndex()\n    ind.add_posting("term", 1, 1)\n    ind.add_posting("term", 2, 4)\n    \n    # Testing existing term\n    postings = ind.get_postings("term")\n    assert len(postings) == 2\n    assert postings[0].doc_id == 1\n    assert postings[0].payload == 1\n    assert postings[1].doc_id == 2\n    assert postings[1].payload == 4\n   \n    # Testing non-existent term\n    assert ind.get_postings("xyx") is None\n    \n    #Test is_empty and clear_structure and get_structure\n    assert ind.is_empty() == False\n    ind.clear_structure()\n    assert ind.is_empty() ==True\n    assert ind.get_postings("term") == None\n    ind.add_posting("term", 57, 4)\n    ind2=ind.get_structure()\n    assert ind.get_postings("term")[0].doc_id==ind2["term"][0].doc_id and ind.get_postings("term")[0].payload==ind2["term"][0].payload\n    \n    #Test vocabulary\n    ind = InvertedIndex()\n    ind.add_posting("term1", 1)\n    ind.add_posting("term2", 1)\n    ind.add_posting("term3", 2)\n    ind.add_posting("term2", 3)\n    assert set(ind.get_terms()) == set(["term1", "term2", "term3"])\n    \ndef test_posting_data_structure():\n    posting_1=Posting(4,5)\n    \n    assert posting_1.doc_id==4\n    assert posting_1.payload==5\n    \n    posting_2=Posting.from_string("1:45")\n    assert posting_2.doc_id==1\n    assert posting_2.payload==45')
 
 
-# In[6]:
+# In[8]:
 
 
 test_documents=[
@@ -280,15 +318,15 @@ test_documents=[
 ]
 
 
-# In[15]:
+# In[9]:
 
 
-get_ipython().run_cell_magic('ipytest', '', '\nindexBuilder=IndexBuilder()\n\ntest_documents=[\n    "this is a random sentence without punctuation",\n    "python is a versatile programming language",\n    "the quick brown fox jumps over the lazy dog",\n    "coding is a creative and logical process",\n    "sunsets are a beautiful sight to behold",\n    "coffee is a popular beverage around the world",\n    "music has the power to evoke emotions",\n    "books transport readers to different worlds",\n    "kindness and compassion make the world better",\n    "the moonlight reflects on the calm lake in the night the vision is awesome",\n    "nature provides solace and tranquility",\n    "imagination knows no boundaries",\n    "friendship is a treasure worth cherishing",\n    "happiness is found in simple moments",\n    "laughter is contagious and brings joy is better for all"\n]\n\n\ndef test_index_building():\n\n    #Test buildInMemoryIndex\n    \n    index=indexBuilder.build_in_memory_index(test_documents)\n    \n    assert len(index.get_postings("is"))==8 \n    assert index.get_postings("is")[2].doc_id==3 and index.get_postings("is")[2].payload==1\n    assert index.get_postings("is")[7].doc_id==14 and index.get_postings("is")[7].payload==2\n    \n    assert len(index.get_postings("python"))==1 \n    assert index.get_postings("python")[0].doc_id==1 and index.get_postings("python")[0].payload==1\n    \n    assert len(index.get_postings("the"))==5 \n    assert index.get_postings("the")[4].doc_id==9 and index.get_postings("the")[4].payload==4\n\n\n    \n    \n    #Test Blocked Sort-Based Indexing\n    \n    for i in range(1,6):   #Test for different block size\n        \n        indexBuilder.build_block_sort_base_indexing(test_documents,"complete_inverted_index_TEST"+str(i)+".txt",500*i,True)\n\n        #After testing the correctness of in memory index\n        #for this short document collection I read the output file and store it in main memory, \n        #then check the correct presence of terms and postings.\n\n        ind_read_from_disk=InvertedIndex()\n        with open("complete_inverted_index_TEST"+str(i)+".txt", "r") as file:\n            for line in file:\n\n                term=line.split()[0]\n                postings_str_lst=line.split()[1:]\n\n                for posting in  postings_str_lst:\n                    doc_id,freq=posting.split(":")\n                    ind_read_from_disk.add_posting(term,int(doc_id),int(freq))\n\n\n        assert len(ind_read_from_disk.get_postings("is"))==8 \n        assert ind_read_from_disk.get_postings("is")[2].doc_id==3 and ind_read_from_disk.get_postings("is")[2].payload==1\n        assert ind_read_from_disk.get_postings("is")[7].doc_id==14 and ind_read_from_disk.get_postings("is")[7].payload==2\n\n        assert len(ind_read_from_disk.get_postings("python"))==1 \n        assert ind_read_from_disk.get_postings("python")[0].doc_id==1 and ind_read_from_disk.get_postings("python")[0].payload==1\n\n        assert len(ind_read_from_disk.get_postings("the"))==5 \n        assert ind_read_from_disk.get_postings("the")[4].doc_id==9 and ind_read_from_disk.get_postings("the")[4].payload==4\n    ')
+get_ipython().run_cell_magic('ipytest', '', '\nindexBuilder=IndexBuilder()\n\ntest_documents=[\n    "this is a random sentence without punctuation",\n    "python is a versatile programming language",\n    "the quick brown fox jumps over the lazy dog",\n    "coding is a creative and logical process",\n    "sunsets are a beautiful sight to behold",\n    "coffee is a popular beverage around the world",\n    "music has the power to evoke emotions",\n    "books transport readers to different worlds",\n    "kindness and compassion make the world better",\n    "the moonlight reflects on the calm lake in the night the vision is awesome",\n    "nature provides solace and tranquility",\n    "imagination knows no boundaries",\n    "friendship is a treasure worth cherishing",\n    "happiness is found in simple moments",\n    "laughter is contagious and brings joy is better for all"\n]\n\n\ndef test_index_building():\n\n    #Test buildInMemoryIndex\n    \n    index=indexBuilder.build_in_memory_index(test_documents)\n    \n    assert len(index.get_postings("is"))==8 \n    assert index.get_postings("is")[2].doc_id==3 and index.get_postings("is")[2].payload==1\n    assert index.get_postings("is")[7].doc_id==14 and index.get_postings("is")[7].payload==2\n    \n    assert len(index.get_postings("python"))==1 \n    assert index.get_postings("python")[0].doc_id==1 and index.get_postings("python")[0].payload==1\n    \n    assert len(index.get_postings("the"))==5 \n    assert index.get_postings("the")[4].doc_id==9 and index.get_postings("the")[4].payload==4\n\n\n    \n    \n    #Test Blocked Sort-Based Indexing\n    \n    for i in range(1,6):   #Test for different block size\n        \n        indexBuilder.build_block_sort_base_indexing(test_documents,"complete_inverted_index_TEST"+str(i),500*i,False,True)\n\n        #After testing the correctness of in memory index\n        #for this short document collection I read the output file and store it in main memory, \n        #then check the correct presence of terms and postings.\n\n        ind_read_from_disk=InvertedIndex()\n        with open("complete_inverted_index_TEST"+str(i)+indexBuilder.OUTPUT_FILE_FORMAT, "r") as file:\n            for line in file:\n\n                term=line.split()[0]\n                postings_str_lst=line.split()[1:]\n\n                for posting in  postings_str_lst:\n                    doc_id,freq=posting.split(":")\n                    ind_read_from_disk.add_posting(term,int(doc_id),int(freq))\n\n\n        assert len(ind_read_from_disk.get_postings("is"))==8 \n        assert ind_read_from_disk.get_postings("is")[2].doc_id==3 and ind_read_from_disk.get_postings("is")[2].payload==1\n        assert ind_read_from_disk.get_postings("is")[7].doc_id==14 and ind_read_from_disk.get_postings("is")[7].payload==2\n\n        assert len(ind_read_from_disk.get_postings("python"))==1 \n        assert ind_read_from_disk.get_postings("python")[0].doc_id==1 and ind_read_from_disk.get_postings("python")[0].payload==1\n\n        assert len(ind_read_from_disk.get_postings("the"))==5 \n        assert ind_read_from_disk.get_postings("the")[4].doc_id==9 and ind_read_from_disk.get_postings("the")[4].payload==4\n    ')
 
 
 # # Example of usage
 
-# In[ ]:
+# In[10]:
 
 
 # tot_doc=[
@@ -354,36 +392,13 @@ get_ipython().run_cell_magic('ipytest', '', '\nindexBuilder=IndexBuilder()\n\nte
 #             "People people people"]
 
 
-#indexBuilder=IndexBuilder()
-#ii=indexBuilder.build_in_memory_index(tot_doc)
-#indexBuilder.build_block_sort_base_indexing(tot_doc,"complete_inverted_index.txt",2220,True)
+# indexBuilder=IndexBuilder()
+# #ii=indexBuilder.build_in_memory_index(tot_doc)
+# indexBuilder.build_block_sort_base_indexing(tot_doc,"complete_inverted_index",2220,False,True)
 
 
-# In[27]:
+# In[ ]:
 
 
-#Altre funzioni di utilità non ancora considerate.
 
-def count_lexicon_in_list_of_strings(string_list):
-    return len(set([term for doc in tot_doc for term in doc.lower().split()]))
-
-def read_integer_list_from_file(file_path):
-    integer_list = []
-    try:
-        with open(file_path, 'r') as file:
-            for line in file:
-                integer_list.append(int(line.strip()))
-        return integer_list
-    except IOError as e:
-        print(f"Error reading from {file_path}: {e}")
-        return None
-
-def write_integer_list_to_file(file_path, integer_list):
-    try:
-        with open(file_path, 'w') as file:
-            for number in integer_list:
-                file.write(str(number) + '\n')
-        print(f"List of integers written to {file_path}")
-    except IOError as e:
-        print(f"Error writing to {file_path}: {e}")
 
