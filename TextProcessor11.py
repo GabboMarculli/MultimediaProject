@@ -1,27 +1,51 @@
-# 11
-# Stemming & Stopword Removal. Stemming and stopword removal should be implemented. For stemming, you can use any third-party library providing the Porter
-# stemming algorithm or similar. For stopword removal, you can use any english stopwords list available on the Web. Ideally, your program should have a compile 
+#!/usr/bin/env python
+# coding: utf-8
+
+# 11<br>
+# Stemming & Stopword Removal. Stemming and stopword removal should be implemented. For stemming, you can use any third-party library providing the Porter<br>
+# stemming algorithm or similar. For stopword removal, you can use any english stopwords list available on the Web. Ideally, your program should have a compile <br>
 # flag that allows you to enalbe/disble stemming & stopword removal.
+
+# In[14]:
+
 
 import ipytest
 import pytest
+ipytest.autoconfig()
+
+
+# In[5]:
+
 
 import re
 from nltk.tokenize import word_tokenize
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 from nltk.stem import WordNetLemmatizer
 
+
+# In[6]:
+
+
 from nltk.corpus import stopwords
 from langdetect import detect
 
-# custom_stop_words = set(stopwords.words('english'))
+
+# custom_stop_words = set(stopwords.words('english'))<br>
 # custom_stop_words.update(['oh', 'like', 'yes', 'please','well', 'yeah', 'hey', 'ok', 'also', 'yet', 'maybe', 'ever', 'sure', 'hello', 'goodbye'])
+
+# In[7]:
+
 
 from nltk.stem import SnowballStemmer, PorterStemmer
 from nltk.tokenize import RegexpTokenizer
 import demoji
 
+
 # Mappa delle lingue
+
+# In[8]:
+
+
 language_map = {
     'ar': 'arabic',
     'az': 'azerbaijani',
@@ -48,6 +72,10 @@ language_map = {
     'tr': 'turkish'
 }
 
+
+# In[9]:
+
+
 class TextProcessor:
     def __init__(self, use_stemming=True, use_stopwords=True):
         self.use_stemming = use_stemming # flag per abilitare o disabilitare 
@@ -57,7 +85,6 @@ class TextProcessor:
         self.reg_exp_usernames = r'@\w+'
         self.control_char_pattern=r'[\x00-\x1F\x7F-\x9F]'
         self.reg_exp_web_link_pattern=r'https*://\S+|www.\S+'
-
     def process_text(self, text):
         # Rimuovo caratteri speciali e spazi multipli dal testo
         text = self.clean_text(text)
@@ -69,24 +96,23 @@ class TextProcessor:
         tokenizer = RegexpTokenizer(r'\w+')
         word_tokens = tokenizer.tokenize(text)
 
-        # Se il flag delle stop words è attivo, le rimuovo
+        # Se il flag delle stop words Ã¨ attivo, le rimuovo
         if self.use_stopwords:
             word_tokens = self.remove_stopwords(word_tokens, language)
            
         # Se faccio prima stem e poi lemmatize, ho che "sense" diventa "sen" invece di "sens"
         # Ma se faccio prima lemmatize e poi stem ho che "ellipses" diventa "ellipsi" invece di "ellips"
-        # Ho scelto di mettere prima la lemmatizzazione perchè altrimenti si può perdere informazioni, poiché lo stemming tende a ridurre le parole alla loro forma più semplice rimuovendo affissi, 
+        # Ho scelto di mettere prima la lemmatizzazione perchÃ¨ altrimenti si puÃ² perdere informazioni, poichÃ© lo stemming tende a ridurre le parole alla loro forma piÃ¹ semplice rimuovendo affissi, 
         # mentre la lemmatizzazione mira a portare le parole alla loro forma di base. In questo caso, parole come "sense" possono essere troncate in "sen" prima di arrivare alla lemmatizzazione, 
-        # causando una perdita di informazioni. Così almeno si ha la forma base corretta della parola
+        # causando una perdita di informazioni. CosÃ¬ almeno si ha la forma base corretta della parola
         # word_tokens = self.lemmatize(word_tokens, language)
 
-        # Se il flag dello stem è attivo, lo effettuo
+        # Se il flag dello stem Ã¨ attivo, lo effettuo
         if self.use_stemming:
             word_tokens = self.stem_text(word_tokens, language)
 
         # Ritrasformo la lista di tokens in una stringa
         return TreebankWordDetokenizer().detokenize(word_tokens)
-
     def stem_text(self, tokens, language):
         try:
             if language == 'english':
@@ -94,21 +120,19 @@ class TextProcessor:
             else:
                 stemmer = SnowballStemmer(language)
         except ValueError:
-                # Se la lingua non è presente fra quelle della libreria nltk, esco senza effettuare modifiche agli elementi della lista
+                # Se la lingua non Ã¨ presente fra quelle della libreria nltk, esco senza effettuare modifiche agli elementi della lista
                 return 
         
         stemmed_words = [stemmer.stem(word)
                           for word in tokens]
         return stemmed_words
-
     def remove_stopwords(self, tokens, language):
         try:
             # Seleziona il set di stopwords corrispondente alla lingua
             stop_words = set(stopwords.words(language))
         except ValueError:
-            # Se la lingua non è presente fra quelle della libreria nltk, esco senza effettuare modifiche agli elementi della lista
+            # Se la lingua non Ã¨ presente fra quelle della libreria nltk, esco senza effettuare modifiche agli elementi della lista
             return
-
         filtered_words = [word for word in tokens 
                         if word.lower() not in stop_words]
         return filtered_words
@@ -120,9 +144,7 @@ class TextProcessor:
         # replace special characters 
         combined_pattern = re.compile(self.reg_exp_hashtags + '|' + self.reg_exp_punctuation + '|' + self.reg_exp_usernames + '|' + self.control_char_pattern + '|' + self.reg_exp_web_link_pattern)
         text = re.sub(combined_pattern, " ", text)
-
         text = demoji.replace(text, " ")
-
         return text.strip()
     
     '''
@@ -136,11 +158,15 @@ class TextProcessor:
     '''
 
 
-##############################################################################################
-# testing
-##############################################################################################
+# ############################################################################################<br>
+# testing<br>
+# ############################################################################################
 
 # Array di test in inglese
+
+# In[20]:
+
+
 TEST_SENTENCES = [
     "This is a sentence with multiple spaces  and punctuation!",
     "Oh no, there are special characters like @, #, $, %, and ^ in this sentence.",
@@ -162,11 +188,16 @@ TEST_SENTENCES = [
     "The weather is beautiful today, with clear skies and a gentle breeze.",
     "Eating fruits and vegetables is essential for a healthy diet.",
     "Learning new skills is beneficial for personal and professional growth.",
-    "Traveling to different countries exposes you to diverse cultures and traditions.",
+    "Traveling to different countries exposes you to diverse cultures and traditions."
     "The pen      😓    is on the  😓  !? tables  👿  riding .."
 ]
 
+
 # Array dei risultati attesi in inglese
+
+# In[21]:
+
+
 EXPECTED_SENTENCES = [
     "sentenc multipl space punctuat",
     "special charact sentenc",
@@ -192,30 +223,36 @@ EXPECTED_SENTENCES = [
     "pen tabl ride"
 ]
 
+
+# In[22]:
+
+
 text_processor = TextProcessor() 
 
-'''
-processed_sentences = []
-for sentence in test_sentences:
-    processed_sentence = text_processor.process_text(sentence)
-    processed_sentences.append(processed_sentence)
+
+# 
+# <br>
+# processed_sentences = []<br>
+# for sentence in test_sentences:<br>
+#     processed_sentence = text_processor.process_text(sentence)<br>
+#     processed_sentences.append(processed_sentence)<br>
+# def check_test_results(test_array, expected_array):<br>
+#     for i in range(len(test_array)):<br>
+#         if test_array[i] != expected_array[i]:<br>
+#             print(f"Test {i + 1}: Failed")<br>
+#             print(test_array[i])<br>
+# # Utilizzo della funzione<br>
+# check_test_results(processed_sentences, EXPECTED_SENTENCES) <br>
+# 
+
+# In[23]:
 
 
-def check_test_results(test_array, expected_array):
-    for i in range(len(test_array)):
-        if test_array[i] != expected_array[i]:
-            print(f"Test {i + 1}: Failed")
-            print(test_array[i])
+get_ipython().run_cell_magic('run_pytest[clean]', '', '\n\n@pytest.mark.parametrize("test_sentences,expected_results", list(zip(TEST_SENTENCES,EXPECTED_SENTENCES)))\ndef test_eval(test_sentences:str, expected_results:str):\n    ris=text_processor.process_text(test_sentences)\n    print (ris)\n    print ("----")\n    print (expected_results)\n    assert ris == expected_results')
 
-# Utilizzo della funzione
-check_test_results(processed_sentences, EXPECTED_SENTENCES) 
-'''
 
-@pytest.mark.parametrize("test_sentences,expected_results", list(zip(TEST_SENTENCES,EXPECTED_SENTENCES)))
-def test_eval(test_sentences:str, expected_results:str):
-    ris=text_processor.process_text(test_sentences)
-    print (ris)
-    print ("----")
-    print (expected_results)
-    assert ris == expected_results
+# In[ ]:
+
+
+
 
