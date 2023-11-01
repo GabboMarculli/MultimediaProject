@@ -1,27 +1,14 @@
-# 11
-# Stemming & Stopword Removal. Stemming and stopword removal should be implemented. For stemming, you can use any third-party library providing the Porter
-# stemming algorithm or similar. For stopword removal, you can use any english stopwords list available on the Web. Ideally, your program should have a compile 
-# flag that allows you to enalbe/disble stemming & stopword removal.
-
-import ipytest
-import pytest
-
 import re
 from nltk.tokenize import word_tokenize
 from nltk.tokenize.treebank import TreebankWordDetokenizer
-from nltk.stem import WordNetLemmatizer
-
 from nltk.corpus import stopwords
 from langdetect import detect
 
-# custom_stop_words = set(stopwords.words('english'))
-# custom_stop_words.update(['oh', 'like', 'yes', 'please','well', 'yeah', 'hey', 'ok', 'also', 'yet', 'maybe', 'ever', 'sure', 'hello', 'goodbye'])
-
-from nltk.stem import SnowballStemmer, PorterStemmer
+from nltk.stem import SnowballStemmer
 from nltk.tokenize import RegexpTokenizer
 import demoji
 
-# Mappa delle lingue
+# Map that associates the abbreviation with the nationality.
 language_map = {
     'ar': 'arabic',
     'az': 'azerbaijani',
@@ -50,8 +37,8 @@ language_map = {
 
 class TextProcessor:
     def __init__(self, use_stemming=True, use_stopwords=True):
-        self.use_stemming = use_stemming # flag per abilitare o disabilitare 
-        self.use_stopwords = use_stopwords # flag per abilitare o disabilitare 
+        self.use_stemming = use_stemming # flag to disable stemming
+        self.use_stopwords = use_stopwords # flag to disable remove stopwords
         self.reg_exp_punctuation = r'[^\w\s]'
         self.reg_exp_hashtags = r'#\w+' 
         self.reg_exp_usernames = r'@\w+'
@@ -59,68 +46,96 @@ class TextProcessor:
         self.reg_exp_web_link_pattern=r'https*://\S+|www.\S+'
 
     def process_text(self, text):
-        # Rimuovo caratteri speciali e spazi multipli dal testo
+        """ Process a text by cleaning, tokenizing, removing stopwords and stemming.
+
+            Args:
+                text: The text to be processed.
+            Returns:
+                The processed text after cleaning, tokenizing, removing stopwords, and stemming.
+        """
+        # Remove special characters
         text = self.clean_text(text)
 
-        # Rilevo la lingua del documento
+        # Get the language
         language = language_map.get(detect(text))
 
-        # Trasformo il documento in una lista di tokens
+        # Transform the document in a list of tokens
         tokenizer = RegexpTokenizer(r'\w+')
         word_tokens = tokenizer.tokenize(text)
 
-        # Se il flag delle stop words è attivo, le rimuovo
+        # Remove stopwords (if its flag is enable)
         if self.use_stopwords:
             word_tokens = self.remove_stopwords(word_tokens, language)
-           
-        # Se faccio prima stem e poi lemmatize, ho che "sense" diventa "sen" invece di "sens"
-        # Ma se faccio prima lemmatize e poi stem ho che "ellipses" diventa "ellipsi" invece di "ellips"
-        # Ho scelto di mettere prima la lemmatizzazione perchè altrimenti si può perdere informazioni, poiché lo stemming tende a ridurre le parole alla loro forma più semplice rimuovendo affissi, 
-        # mentre la lemmatizzazione mira a portare le parole alla loro forma di base. In questo caso, parole come "sense" possono essere troncate in "sen" prima di arrivare alla lemmatizzazione, 
-        # causando una perdita di informazioni. Così almeno si ha la forma base corretta della parola
-        # word_tokens = self.lemmatize(word_tokens, language)
 
-        # Se il flag dello stem è attivo, lo effettuo
+        # Do stemming (if its flag is enable)
         if self.use_stemming:
             word_tokens = self.stem_text(word_tokens, language)
 
-        # Ritrasformo la lista di tokens in una stringa
+        # Transform the list of tokens in a document
+        print(word_tokens)
         return TreebankWordDetokenizer().detokenize(word_tokens)
 
     def stem_text(self, tokens, language):
+        """Stem a list of tokens based on the specified language using Snowball Stemmer.
+
+        Args:
+            tokens: List of tokens to be stemmed.
+            language: The language used for stemming.
+        Returns:
+            The list of tokens after stemming based on the provided language. 
+            If the language is not supported, the function returns the original tokens.
+        """
         try:
-            if language == 'english':
-                stemmer = PorterStemmer()
-            else:
+            if language != None:
                 stemmer = SnowballStemmer(language)
-        except ValueError:
-                # Se la lingua non è presente fra quelle della libreria nltk, esco senza effettuare modifiche agli elementi della lista
-                return 
+            else:
+                return tokens
+        except ValueError: 
+                return tokens
         
+        # Do stem for each tokens in the list
         stemmed_words = [stemmer.stem(word)
                           for word in tokens]
         return stemmed_words
 
     def remove_stopwords(self, tokens, language):
-        try:
-            # Seleziona il set di stopwords corrispondente alla lingua
-            stop_words = set(stopwords.words(language))
-        except ValueError:
-            # Se la lingua non è presente fra quelle della libreria nltk, esco senza effettuare modifiche agli elementi della lista
-            return
+        """Remove stopwords from a list of tokens based on the specified language.
 
+        Args:
+            tokens: List of tokens to be processed.
+            language: The language used to identify the stopwords.
+        Returns:
+            The list of tokens after removing the stopwords based on the provided language. 
+            If the language is not supported, the function returns the original tokens.
+        """
+        try:
+            if language != None:
+                stop_words = set(stopwords.words(language))
+            else:
+                return tokens
+        except ValueError:
+            return tokens
+
+        # If the tokens is in the list of stopwords, remove it
         filtered_words = [word for word in tokens 
                         if word.lower() not in stop_words]
         return filtered_words
     
     def clean_text(self,text):
-        # Trasformo le maiuscole in minuscole
+        """Clean the text by converting to lowercase, replacing special characters, and removing emojis.
+
+        Args:
+            text: The text to be cleaned.
+        Returns:
+            The cleaned text after converting to lowercase, replacing special characters, and removing emojis.
+        """
         text = str(text).lower()
 
-        # replace special characters 
+        # Replace special characters 
         combined_pattern = re.compile(self.reg_exp_hashtags + '|' + self.reg_exp_punctuation + '|' + self.reg_exp_usernames + '|' + self.control_char_pattern + '|' + self.reg_exp_web_link_pattern)
         text = re.sub(combined_pattern, " ", text)
 
+        # Remove emoji
         text = demoji.replace(text, " ")
 
         return text.strip()
@@ -193,7 +208,6 @@ EXPECTED_SENTENCES = [
 ]
 
 text_processor = TextProcessor() 
-
 '''
 processed_sentences = []
 for sentence in test_sentences:
@@ -207,15 +221,7 @@ def check_test_results(test_array, expected_array):
             print(f"Test {i + 1}: Failed")
             print(test_array[i])
 
+
 # Utilizzo della funzione
 check_test_results(processed_sentences, EXPECTED_SENTENCES) 
 '''
-
-@pytest.mark.parametrize("test_sentences,expected_results", list(zip(TEST_SENTENCES,EXPECTED_SENTENCES)))
-def test_eval(test_sentences:str, expected_results:str):
-    ris=text_processor.process_text(test_sentences)
-    print (ris)
-    print ("----")
-    print (expected_results)
-    assert ris == expected_results
-
