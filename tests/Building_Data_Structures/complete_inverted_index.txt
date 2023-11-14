@@ -1,0 +1,210 @@
+a 3:2 5:2 9:1 10:1 14:1 17:1 21:1 25:1 27:1 36:1 51:1 56:1
+actions 11:1
+age 5:1
+alike 42:1
+all 12:1
+alone 46:1
+and 35:1 46:2
+apple 53:1
+are 4:1 34:1
+article 2:1
+as 57:1
+back 45:1
+bag 24:1
+bandwagon 22:1
+be 37:1
+beauty 13:1
+before 16:1 39:1
+beggars 37:1
+beholder 13:1
+best 8:1 19:1 43:1
+better 34:1 38:1
+between 29:1
+biggest 6:1
+bird 30:1
+birds 14:1
+bliss. 44:1
+blue 27:1
+boils 36:1
+boy 5:1
+breaks 45:1
+built 51:1
+buy 47:1
+cake 21:1 35:1
+calm 39:1
+camel's 45:1
+can't 35:1 37:1 47:1
+cat 3:1 24:1 40:1
+catches 30:1
+chickens 16:1
+chin 23:1
+choosers 37:1
+cleanliness 15:1
+cloud 17:1
+count 16:1
+curiosity 40:1
+day 1:1 41:1 51:1
+do 57:2
+doesn't 53:1
+dog 3:1 41:1
+don't 16:1 56:1
+each 33:1
+early 30:1
+eat 35:1
+english 7:1
+every 17:1 41:1
+eye 13:1
+fall 53:1
+far 53:1
+faster 3:1
+feather 14:1
+fire 32:1
+fits, 20:1
+flock 14:1
+fool 18:2
+for 10:1 43:2
+from 53:1
+glass 50:1
+glitters 12:1
+godliness 15:1
+gold 12:1
+golden 52:1
+good 48:1
+goodmoring 2:1
+great 42:1
+happiness 47:1
+has 17:1 41:1
+hatch 16:1
+have 35:1
+heads 34:1
+his 33:1
+home 55:1
+honesty 19:1
+hope 43:1
+houses 50:1
+how 4:1
+i 9:1
+if 20:1
+ignorance 44:1
+in 6:1 8:1 13:1 27:1 50:1 51:1 57:1
+invention 26:1
+is 0:1 1:1 3:1 5:1 6:1 7:1 8:1 12:1 13:1 15:1 19:1 26:1 31:1 44:1 48:1 52:1
+it 20:1 35:1
+it's 21:1 45:1
+italian 7:1
+its 41:1
+jump 22:1
+keep 23:1
+killed 40:1
+lake 6:2
+last 9:1 45:1
+late 38:1
+laugh 46:1
+laughs 46:1
+let 24:1
+like 55:1
+lines 29:1
+lining 17:1
+live 50:1
+long 25:1
+louder 11:1
+low 5:1
+make 25:1 56:1
+makes 28:1
+man 5:1
+marvel 8:1
+me 18:3
+merrier 54:1
+mightier 31:1
+mind 49:1
+minds 42:1
+money 47:1
+moon 27:1
+more, 54:1
+mother 26:1
+necessity 26:1
+netflix 9:1
+never 36:1 38:1
+new 2:1
+news 48:2
+next 15:1
+night 9:1
+no 32:1 48:1 55:1
+not 12:1
+of 6:1 13:1 14:1 21:1 24:1 26:1 49:2
+on 0:1 18:2 22:1
+once 18:1 27:1
+one 6:1 34:1
+ontario 6:1
+out 24:1 49:2
+own 33:1
+pen 0:1 31:1
+penny 10:1
+people 17:2 30:1 50:1 59:3
+perfect 28:1
+piece 21:1
+place 55:1
+policy. 19:1
+pot 36:1
+practice 28:1
+prepare 43:1
+read 29:1
+reap 58:1
+right 56:1
+romans 57:1
+rome 51:1 57:1
+saw 9:1
+series 9:1
+shame 18:2
+shoe 20:1
+short 25:1
+shouldn't 50:1
+sight 49:1
+silence 52:1
+silver 17:1
+smoke 32:1
+sow 58:1
+speak 11:1
+spiderman 8:1
+stones 50:1
+storm 39:1
+story 25:1
+straw 45:1
+sunny 1:1
+superhero 8:1
+sword 31:1
+table 0:1
+than 7:1 11:1 31:1 34:1 38:1
+that 12:1 45:1
+the 0:2 1:1 6:2 8:1 13:2 19:1 20:1 22:1 24:2 26:1 29:1 30:2 31:2 39:1 40:1 43:2 45:2 46:1 53:2 54:2 57:1
+then 3:1
+there's 32:1 55:1
+they 16:1
+think 42:1
+thoughts 10:1
+throw 50:1
+to 15:1 33:1
+together 14:1
+too 35:1
+tree 53:1
+twice 18:1
+two 34:1 56:1
+universe 8:1
+up 23:1
+very 1:1
+wasn't 51:1
+watched 36:1
+wear 20:1
+weep 46:2
+what 58:1
+when 57:1
+who 50:1
+with 5:1 46:1
+without 32:1
+words 11:1
+world 6:1 46:1
+worm 30:1
+worst 7:1 43:1
+wrongs 56:1
+you 4:1 18:1 35:1 46:2 58:2
+your 10:1 16:1 23:1 35:1
