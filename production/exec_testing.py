@@ -49,7 +49,7 @@ def main():
 	total=len(directories)
 	for folder,file in zip(directories,files):
 		print("\n\n")
-		print("START TESTING OF: "+str(folder+file))
+		print("START TESTING OF: "+str(folder)+"\\"+str(file))
 		try:
 			os.chdir(folder)
 			#sys.path.append('tests/structures')
