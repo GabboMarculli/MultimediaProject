@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 from nltk.tokenize import word_tokenize
@@ -13,13 +13,12 @@ from typing import List
 import time
 import re
 
-
 import sys
 sys.path.append('../')  # Go up two folders to the project root
 from utilities.General_Utilities import read_words_from_file 
 
 
-# In[2]:
+# In[6]:
 
 
 """
@@ -32,7 +31,7 @@ class TextProcessor:
         self.use_stemming_and_stop_words = use_stemming_and_stop_words_removal # flag to enable stemming and stop_words_removal
         
         #Regular expression used to clean a raw text.
-        self.reg_exp_punctuation = r'[^\w\s]'
+        self.reg_exp_punctuation = r'[^\w\s]|_'
         self.reg_exp_html_tags=r'<[^>]+>'
         self.reg_exp_hashtags = r'#\w+' 
         self.reg_exp_usernames = r'@\w+'

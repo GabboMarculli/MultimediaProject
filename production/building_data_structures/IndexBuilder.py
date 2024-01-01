@@ -111,7 +111,7 @@ class IndexBuilder:
         self.coll_statistics=Collection_statistics(DIR_DOC_INDEX+"/"+PATH_COLLECTION_STATISTICS)
         
         
-        self.b_d_b=BlockDescriptorBuilder("TODO")
+        self.b_d_b=BlockDescriptorBuilder("")
         
         print ("Using: ")
         print ("Debug Mode :"+str(debug_mode))
@@ -141,8 +141,7 @@ class IndexBuilder:
             for term, freq in tc.items():
                 invertedIndex.add_posting(term, doc_id, freq)
         return invertedIndex
-        
-    
+
     def init_spimi(self)->None:
         """ Function to initialize a clear environment to start building the needed data structures for the spimi phase."""
         
@@ -180,9 +179,12 @@ class IndexBuilder:
         
         self.coll_statistics.read_binary_mode()
         self.scorer=Scoring(self.coll_statistics)
+        
+        self.__open_files_for_merging_operation()
             
     
     def __open_document_index_files(self)->None:
+        """ This function is designed to open the necessary file for the document_index data structure."""
         
         if (self.debug_mode):
             self.file_Final_Document_Index_Debug=open(DIR_DOC_INDEX+"/"+PATH_FINAL_DOCUMENT_INDEX_DEBUG, 'a')
@@ -190,7 +192,7 @@ class IndexBuilder:
         self.file_Final_Document_Index=open(DIR_DOC_INDEX+"/"+PATH_FINAL_DOCUMENT_INDEX, 'ab') 
          
     def __close_files_for_spimi_operation(self)->None:
-       
+        """ This function is designed to close the necessary file for the document_index data structure."""
         if (self.debug_mode):
             self.file_Final_Document_Index_Debug.close()
         
@@ -254,6 +256,7 @@ class IndexBuilder:
         #print (offset_lexicon_terms)
         return sum(1 if element is None else 0 for element in offset_lexicon_terms) == len(offset_lexicon_terms)
     
+    
     def __find_min_term(self,lexicon_temp_terms:List,offset_lex_temp:List):
         """ This function checks and returns the minimum term (lexicographically) among blocks 
              at the current reading offset.
@@ -281,6 +284,32 @@ class IndexBuilder:
                     min_term=lex_elem.term
     
         return min_term
+    
+    
+    def __updateBM25TermUpperBoundInformation(self,lexicon_temp_terms:List,
+                                              min_term:str,lex_row:LexiconRow):
+        """ 
+            This function is used to merge all the statistics on term upperbound discovered in the single blocks
+            in order to obtain an unique and effective term upper bound.
+            
+            Args:
+            lexicon_temp_terms: the set of the terms to search the effective min_term
+            
+            
+        
+        """
+        
+        #This variable is uses as temp to store the max ratio.
+        lexRow_Max_upper=LexiconRow("")
+
+        #For each lexicon term that is the current minimum compute the max term upperbound.
+        for lex_elem in lexicon_temp_terms:
+            if(lex_elem!=None and lex_elem.term==min_term):
+                lexRow_Max_upper.update_term_upper_bound_bm25(lex_elem.BM25Tf,lex_elem.BM25Dl)
+        
+        lex_row.BM25Dl=lexRow_Max_upper.BM25Dl
+        lex_row.BM25Tf=lexRow_Max_upper.BM25Tf
+
     
     
     def __save_postings_and_block_descriptor(self,new_term:bool,
@@ -332,18 +361,29 @@ class IndexBuilder:
         
     
     
-    def single_pass_in_memory_indexing(self,inv_index_block_size: int=2200)-> None:
+    def single_pass_in_memory_indexing(self,memory_dedicated_in_bytes: int=2200)-> None:
+            """ The aim of this method is to handle the entire data collection, at fixed blocks previously set in collection_reader, 
+                to create the relative partial inverted index, lexicon and document_index. 
+                The amount of memory dedicated to this function is indicated in the parameter memory_dedicated_in_bytes. 
+                When the memory threashold exceed, the data structures are then saved on temp files on disk. It's important to note
+                that the inveted index is saved into a file in a lexicografical order and posting list term is order in ascending order of doc_id.
+            Args:
+                memory_dedicated_in_bytes: the amount of memory (in bytes) dedicated to this function
+
+            """
             
             self.init_spimi()
             
             #Fixing the max memory threshold reachable
             ACT_MEM=get_memory_usage()
-            MAX_MEM=ACT_MEM+inv_index_block_size
+            MAX_MEM=ACT_MEM+memory_dedicated_in_bytes
             
-            #Temp data strucutre in RAM
+            #Temp data structure in RAM
             ind = InvertedIndex()
             document_index = DocumentIndex()
+            term_temp=LexiconRow("")
 
+            #Counting variables
             nr_block=0
             doc_index_offset=0
             doc_id=0
@@ -356,26 +396,29 @@ class IndexBuilder:
 
                     if (get_memory_usage()>=MAX_MEM): # if the memory threshold is reached save temp data structure on disk.
 
-                        if (self.debug_mode):
-                            document_index.write_document_index_to_file_debug(self.file_Final_Document_Index_Debug)
-
-                        doc_index_offset=document_index.write_document_index_to_file(self.file_Final_Document_Index,doc_index_offset)
-                        document_index.clear_structure()
-
                         LEXICON_TEMP_BLOCK_PATH=DIR_TEMP_FOLDER+"/"+DIR_TEMP_LEXICON+"/block_nr_"+str(nr_block)
                         DOC_IDS_TEMP_BLOCK_PATH=DIR_TEMP_FOLDER+"/"+DIR_TEMP_DOC_ID+"/block_nr_"+str(nr_block)
                         FREQ_TEMP_BLOCK_PATH=DIR_TEMP_FOLDER+"/"+DIR_TEMP_FREQ+"/block_nr_"+str(nr_block)
 
-                        ind.write_to_block_all_index_in_memory(LEXICON_TEMP_BLOCK_PATH,DOC_IDS_TEMP_BLOCK_PATH,FREQ_TEMP_BLOCK_PATH)
+                        ind.write_to_block_all_index_in_memory(document_index,LEXICON_TEMP_BLOCK_PATH,DOC_IDS_TEMP_BLOCK_PATH,FREQ_TEMP_BLOCK_PATH)
 
                         if (self.debug_mode):
                                 ind.write_to_block_debug_mode(DIR_TEMP_FOLDER+"/inv_index_"+str(nr_block)+".txt")
 
                         ind.clear_structure()
+                        
+                        if (self.debug_mode):
+                            document_index.write_document_index_to_file_debug(self.file_Final_Document_Index_Debug)
+
+                        doc_index_offset=document_index.write_document_index_to_file(self.file_Final_Document_Index,doc_index_offset)
+                        document_index.clear_structure()
+                        
+                        
+                        
                         nr_block=nr_block+1 
 
 
-                    # Separate the doc_id from the content of the real document 
+                    # Separate the doc_no from the content of the real document 
                     doc_list = doc.split()
                     
                     doc_no = str(doc_list[0])
@@ -385,6 +428,8 @@ class IndexBuilder:
 
                     tc = Counter(text.lower().split())  # dict with term counts, Here there is the already preprocessed content
                     for term, freq in tc.items():
+                        
+                        term=term.ljust(term_temp.MAX_TERM_LENGTH)[:term_temp.MAX_TERM_LENGTH]
                         ind.add_posting(term, doc_id, freq)
 
 
@@ -396,22 +441,22 @@ class IndexBuilder:
                         
                     doc_id+=1
 
-                #Finally, saving the last remaing block.  
-
-                if (not document_index.is_empty()):   
-                    if (self.debug_mode):
-                        document_index.write_document_index_to_file_debug(self.file_Final_Document_Index_Debug)
-                    doc_index_offset=document_index.write_document_index_to_file(self.file_Final_Document_Index,doc_index_offset)
+                #Finally, saving the last remaing block, if (remains something)  
 
                 if (not ind.is_empty()):
                     LEXICON_TEMP_BLOCK_PATH=DIR_TEMP_FOLDER+"/"+DIR_TEMP_LEXICON+"/block_nr_"+str(nr_block)
                     DOC_IDS_TEMP_BLOCK_PATH=DIR_TEMP_FOLDER+"/"+DIR_TEMP_DOC_ID+"/block_nr_"+str(nr_block)
                     FREQ_TEMP_BLOCK_PATH=DIR_TEMP_FOLDER+"/"+DIR_TEMP_FREQ+"/block_nr_"+str(nr_block)
 
-                    ind.write_to_block_all_index_in_memory(LEXICON_TEMP_BLOCK_PATH,DOC_IDS_TEMP_BLOCK_PATH,FREQ_TEMP_BLOCK_PATH)
+                    ind.write_to_block_all_index_in_memory(document_index,LEXICON_TEMP_BLOCK_PATH,DOC_IDS_TEMP_BLOCK_PATH,FREQ_TEMP_BLOCK_PATH)
 
                     if (self.debug_mode):
                         ind.write_to_block_debug_mode(DIR_TEMP_FOLDER+"/inv_index_"+str(nr_block)+".txt")
+                        
+                if (not document_index.is_empty()):   
+                    if (self.debug_mode):
+                        document_index.write_document_index_to_file_debug(self.file_Final_Document_Index_Debug)
+                    doc_index_offset=document_index.write_document_index_to_file(self.file_Final_Document_Index,doc_index_offset)
 
                 self.coll_statistics.num_documents=document_index.number_of_documents
                 self.coll_statistics.sum_document_lengths=document_index.total_document_length
@@ -427,12 +472,18 @@ class IndexBuilder:
             
         
     def index_merging(self)-> None:
+        """ This aim of this method is to merge all the partial data structure processed in the previous method 
+            single_pass_in_memory_indexing in order to create a unique ordered inverted index and lexicon. 
+            The idea is to open all blocks in parallel and selecting at each time the term that is 
+            lexicografical lower then others, then merging and sorting its posting lists. It can be possibile because
+            the maximum number of posting that can be loaded into memory is given by the size of the block descriptor, so we are sure that 
+            and at the end the final posting list of a term will be ordered by doc_id and can be loaded partially in
+            main memory.
+        """
 
         self.init_index_merging()
         
         try:
-
-            self.__open_files_for_merging_operation()
 
             #Initialization of empty lexicon row elements for each block.
             lexicon_temp_elems=[LexiconRow("",0) for i in range (len (self.input_lex_temp_files))]
@@ -440,8 +491,8 @@ class IndexBuilder:
             #Start reading the first element in the lexicon of each block and saving the offset of each read.
             offset_lex_temp=[terms.read_lexicon_row_on_disk_from_opened_file(self.input_lex_temp_files[index],0) for index,terms in enumerate(lexicon_temp_elems)]
             
-            #print(offset_lex_temp)
             
+            #Counting variables
             number_of_distinct_terms=0
             
             current_offset_lexicon=0
@@ -449,10 +500,11 @@ class IndexBuilder:
             current_offset_freq=0
             current_offset_block_descriptor=0
 
-            #First, check if all blocks opened blocks are read.
+            #Until all the blocks are read, this means if there is a term to process enter in this part. 
             while (not self.__check_all_blocks_are_read(offset_lex_temp)):
 
                 start_loop=time.time()
+                
                 #Find the minimum term among the opened blocks.
                 min_term=self.__find_min_term(lexicon_temp_elems,offset_lex_temp)
                 tot_posting=sum(lex_elem.dft if (lex_elem.term==min_term) else 0 for lex_elem in lexicon_temp_elems) 
@@ -462,12 +514,15 @@ class IndexBuilder:
                 
                 #print("\nMin termine corrente: "+min_term+ " nr. postings: "+str(tot_posting))
                 
-                #New Term to add definitively
+                #New Term to add definitively to final NEW LEXICON datastructure
                 new_Lexicon_Def=LexiconRow(min_term,tot_posting)
                 new_Lexicon_Def.docidOffset=current_offset_doc_ids
                 new_Lexicon_Def.frequencyOffset=current_offset_freq
-                new_Lexicon_Def.blockOffset=current_offset_block_descriptor  
+                new_Lexicon_Def.blockOffset=current_offset_block_descriptor 
                 
+                self.__updateBM25TermUpperBoundInformation(lexicon_temp_elems,min_term,new_Lexicon_Def)
+                
+                #Here I take from BlockDescriptorBuilder the number of blocks needed to save the current postings for the current term.
                 new_Lexicon_Def.numBlocks=self.b_d_b.get_number_of_blocks(tot_posting)
                 
                 nr_of_postings_per_block_descriptor=math.ceil(tot_posting/new_Lexicon_Def.numBlocks)
@@ -476,9 +531,11 @@ class IndexBuilder:
                 #Initialization of empty block descriptor.
                 block_descriptor=BlockDescriptor(0,current_offset_doc_ids,current_offset_freq,0,0,0,0)
                 
+                #Temp variables for postings among different file blocks
                 merged_posting_list=[]
-                MAX_TF=0
-                #Number of postings that I can load in memory RAM.
+                MAX_TF=0 
+                
+                #Number of postings that I can load in memory (RAM).
                 readable_postings=nr_of_postings_per_block_descriptor-len(merged_posting_list)
                 
                 for index,lex_term in enumerate(lexicon_temp_elems):
@@ -491,7 +548,8 @@ class IndexBuilder:
                         doc_id_block_offset=lex_term.docidOffset
                         freq_block_offset=lex_term.frequencyOffset
                         
-                        #There are still some posting related to this min_term to be read in this block.
+                        #There are still some posting related to this min_term to be read in this block. 
+                        #This is done to avoid to load the entire posting list in RAM that may not be possible if posting is huge.
                         while(posting_to_be_read>0):
                             
                             #Here I can read in one shot all the posting list of that term in the block in memory.
@@ -512,7 +570,8 @@ class IndexBuilder:
                             
                             curr_max_tf=InvertedIndex.compute_max_term_frequency_of_posting_list(postingList)
                             if (curr_max_tf>MAX_TF):
-                                MAX_TF=curr_max_tf
+                                MAX_TF=curr_max_tf  #Updating the new_maximum term frequency.
+                            
                             #I combine the posting I have just read with those read previously
                             merged_posting_list=InvertedIndex.merge_posting_lists(merged_posting_list,postingList)
                             
@@ -527,6 +586,7 @@ class IndexBuilder:
                                                                           current_offset_block_descriptor,
                                                                           block_descriptor)
                                 new_term=False
+                                
                                 #Re-set the datastructures for new block descriptor.
                                 merged_posting_list.clear()
                                 block_descriptor=BlockDescriptor(0,current_offset_doc_ids,current_offset_freq,0,0,0,0)
@@ -538,7 +598,8 @@ class IndexBuilder:
                         # I read the next lexicon term related to this block file.
                         offset_lex_temp[index]=lex_term.read_lexicon_row_on_disk_from_opened_file(self.input_lex_temp_files[index],offset_lex_temp[index])
                 
-                ### END-FOR       
+                ### END-FOR 
+                
                 if (len(merged_posting_list)>0):
             
                     #Here I finish to write the remaining posting list to disk and the related block descriptor.
@@ -547,16 +608,21 @@ class IndexBuilder:
                                                                           current_offset_block_descriptor,
                                                                           block_descriptor)
                 
-                
-                # In questa parte qui si vanno a calcolare le definitive metriche per le query ed anche 
-                # i descrittori di blocco per skipping e altro. 
-                #Valutare se aggiungere calcolo metriche o altre informazioni utili per la query execution.
+                 
+                #Here I compute the offline metrics and complete the remaining information to lexicon term 
+                # in order to save time for future online execution of the query.
                 
                 new_Lexicon_Def.idft=self.scorer.compute_IDFT(tot_posting)
                 new_Lexicon_Def.max_tf=MAX_TF
                 new_Lexicon_Def.maxTFIDF=self.scorer.compute_TFIDF(MAX_TF,new_Lexicon_Def.idft)
                 
-                
+                new_Lexicon_Def.maxBM25=self.scorer.compute_term_upper_bound_bm25(new_Lexicon_Def)
+                if (min_term=='a'.ljust(30)):
+                    print(new_Lexicon_Def.maxBM25)
+                    print(new_Lexicon_Def.BM25Dl)
+                    print(new_Lexicon_Def.BM25Tf)
+                    
+
                 new_Lexicon_Def.docidSize=(current_offset_doc_ids-new_Lexicon_Def.docidOffset)
                 new_Lexicon_Def.frequencySize=(current_offset_freq-new_Lexicon_Def.frequencyOffset)
                 
@@ -564,16 +630,18 @@ class IndexBuilder:
                 if (self.debug_mode):
                     new_Lexicon_Def.write_lexicon_row_on_disk_debug_mode(self.file_Final_Lexicon_Debug)
                 current_offset_lexicon=new_Lexicon_Def.write_lexicon_row_on_disk_to_opened_file(self.file_Final_Lexicon,current_offset_lexicon)
+                
                 number_of_distinct_terms+=1
                 
                 end_part_loop=time.time()  
                 print("Merging term processed: "+min_term+" Time spent :"+str(end_part_loop-start_loop))
             
+            #When the procedure is finished save the statistic of the collection.
             self.coll_statistics.num_distinct_terms=number_of_distinct_terms
             self.coll_statistics.write_binary_mode()
             if (self.debug_mode):
                 self.coll_statistics.save_statistics(DIR_DOC_INDEX+"/"+PATH_COLLECTION_STATISTICS_DEBUG)
-            
+#             
             print("END METHOD!")   
             
         except Exception as e:   
@@ -657,7 +725,7 @@ tot_doc=[
 #indexBuilder.build_block_sort_base_indexing(tot_doc,"complete_inverted_index",2220,False,False)
 
 
-# In[5]:
+# In[6]:
 
 
 #indexBuilder=IndexBuilder(True,True,Collection_Reader("",-1,-1,False,False,tot_doc))

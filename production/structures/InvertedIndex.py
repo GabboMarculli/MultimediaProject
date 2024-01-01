@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 import sys
@@ -17,9 +17,10 @@ sys.path.append('../')  # Go up two folders to the project root
 #from structures.Lexicon import Lexicon
 from structures.LexiconRow import LexiconRow
 from utilities.Compression import Compression 
+from structures.DocumentIndex import DocumentIndex
 
 
-# In[3]:
+# In[2]:
 
 
 #Costants
@@ -28,11 +29,14 @@ TYPE_DOC_ID="type_doc_id"
 TYPE_FREQ="type_freq"
 
 
-# In[4]:
+# In[3]:
 
 
 @dataclass
 class Posting:
+    
+    SIZE_POSTING=16
+    
     doc_id: int
     frequency: Any = None
     
@@ -85,8 +89,8 @@ class Posting:
 class InvertedIndex:
 
     def __init__(self):
-        self._index = defaultdict(list)
-        
+        self._index = defaultdict(list[Posting])
+         
     def add_posting(self, term: str, doc_id: int, frequency: Any=None) -> None:
         """Adds a document to the posting list of a term.
 
@@ -96,9 +100,11 @@ class InvertedIndex:
             frequency: the frequency of a term inside a specific doc_id to be added 
             
         """
-        # append new posting to the posting list
+        # append new posting to the posting list, we process one doc at time so
+        #it's not possible to have multiple doc_ids with same value.
         if (self.get_postings(term)==None):
             self._index[term]=[]
+        
         self._index[term].append(Posting(doc_id,frequency))
              
     def get_postings(self, term: str) -> List[Posting]:
@@ -264,7 +270,7 @@ class InvertedIndex:
         return posting_list,offset_doc_ids+doc_ids_byte_size,offset_freq+freq_byte_size
         
     
-    def write_to_block_all_index_in_memory(self,path_lexicon: str,path_doc_ids:str,path_freq:str)-> None:
+    def write_to_block_all_index_in_memory(self,document_index:DocumentIndex,path_lexicon: str,path_doc_ids:str,path_freq:str)-> None:
         """ Function to write the overall index in main memory to a file "block" during the SPIMI phase.
             Pay attention, here the postings in a non compressed mode!
             
@@ -288,7 +294,10 @@ class InvertedIndex:
                     for term,postings in sorted_lexicon:
                         #Istantiate a lexicon row
                         lexRow=LexiconRow(term,len(postings),0,0,0,0,0,offset_doc_ids,offset_freq,0,0)
-                          
+                        
+                        for posting in postings:
+                            lexRow.update_term_upper_bound_bm25(posting.frequency, document_index.get_document(posting.doc_id).document_length)    
+                        
                         #Save posting list to specifics file
                         offset_doc_ids,offset_freq=InvertedIndex.write_to_files_a_posting_list(postings,False,f_doc_id,f_freq,offset_doc_ids,offset_freq)     
                         

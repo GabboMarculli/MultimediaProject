@@ -22,6 +22,10 @@ from structures.BlockDescriptor import BlockDescriptor
 # In[2]:
 
 
+"""The aim of this class is to handle the entire posting list that can be partially on memory and partial on disk.
+   This class exends the classical concept of the iterator in Python in order to hide all the details of the implementation
+   about loading other postings from disk.
+"""
 class Posting_List_Reader:
     
     lexicon_elem:LexiconRow
@@ -39,7 +43,15 @@ class Posting_List_Reader:
     __current_posting: Posting
     
     def __init__(self,lexiconRow:LexiconRow,compression_mode:bool,file_doc_ids:BinaryIO,file_freqs:BinaryIO,file_blocks:BinaryIO):
+        """ Costructor method:
+            Args:
+            lexiconRow: the lexicon element related that we want to read the posting list
+            compression_mode: the modality in which the posting list is saved
+            file_doc_ids: the file from which loading the doc_ids of the posting list
+            file_freqs: the file from which loading the freqs of the posting list
+            file_blocks: the file from which loading the blocks of the posting list
         
+        """
         self.lexicon_elem=lexiconRow
         
         self.compression_mode=compression_mode
@@ -51,10 +63,11 @@ class Posting_List_Reader:
         
         self.__block_descriptors=[]
         self.__posting_list=iter([])
-         
+        
+        #Saving immediatly the information about all the blocks of a posting in memory.
         for i in range(0,self.lexicon_elem.numBlocks):
             block=BlockDescriptor()
-            block.read_block_descriptor_on_disk_from_opened_file(self.file_blocks,block.SIZE_BLOCK_DESCRIPTOR*i)
+            block.read_block_descriptor_on_disk_from_opened_file(self.file_blocks,self.lexicon_elem.blockOffset + (block.SIZE_BLOCK_DESCRIPTOR*i))
             self.__block_descriptors.append(block)
                  
         self.__block_index=-1
@@ -63,10 +76,12 @@ class Posting_List_Reader:
         return self
  
     def __update_posting_list__(self):
-        
+        """
+            This function loads from disk the part of the posting list of the next block if available.
+        """
         current_block=self.get_current_block()
         if (current_block!=None and self.__block_index<len(self.__block_descriptors)):
-            print("Leggo da disco effettivamente")
+            # print("Leggo da disco effettivamente")
             lista,_,_=iter(InvertedIndex.read_from_files_a_posting_list(self.file_doc_ids,
                                                                  self.file_freqs,
                                                                  self.compression_mode,
@@ -80,7 +95,9 @@ class Posting_List_Reader:
             self.__posting_list=iter(lista)
             
     def __next__(self):
-           
+        """
+            This method returns the next element in the posting list updating the current one.
+        """  
         self.__current_posting=next(self.__posting_list,None)
         
         if (self.__current_posting==None and self.__block_index<len(self.__block_descriptors)):
@@ -92,227 +109,52 @@ class Posting_List_Reader:
                 raise StopIteration()
         return self.__current_posting
     
+    def get_total_blocks(self):
+        """ This method returns the total number of blocks in for a specific lexicon term."""
+        return len(self.__block_descriptors)
     
     def get_current_block(self):
+        """ This method returns the current block information for a specific lexicon term."""
         if (self.__block_index<0 or self.__block_index>=len(self.__block_descriptors)):
             return None
         return self.__block_descriptors[self.__block_index]
     
     def get_current_posting(self):
+        """ This method returns the current posting of a posting list."""
+        return self.__current_posting
+
+    def nextGEQ(self, doc_id: int):
+        """ 
+         This method is used to skip the posting list to a specific element with greater or equal doc_id passed as argument.
+         Args:
+             doc_id: the doc_id to skip to
+        """
+        # flag to check if the block has changed
+        block_changed = False
+
+        # move to the block with max_doc_id >= doc_id
+        # current block is None only if it's the first read
+        while self.get_current_block() is None or self.get_current_block().max_doc_id < doc_id:
+            # end of list, return None
+            if self.__block_index >= len(self.__block_descriptors) - 1:
+                self.__current_posting = None
+                return None
+
+            self.__block_index += 1
+            block_changed = True
+
+        if self.get_current_block() is not None:
+            self.__update_posting_list__()
+
+        # block changed, load postings and update iterator
+        if block_changed:
+            # remove previous postings
+            self.__current_posting = next(self.__posting_list, None)
+        
+        # move to the first posting greater or equal then docid and return it
+        while self.__current_posting is not None and self.__current_posting.doc_id < doc_id:
+            self.__current_posting = next(self.__posting_list, None)
+        
         return self.__current_posting
           
-
-
-# In[3]:
-
-
-# DIR_TEMP_FOLDER="TEMP"
-# DIR_TEMP_DOC_ID="DOC_ID_TEMP"
-# DIR_TEMP_FREQ="FREQ_TEMP"
-# DIR_TEMP_LEXICON="LEXICON_TEMP"
-
-# DIR_LEXICON="../building_data_structures/LEXICON"
-# DIR_DOC_INDEX="../building_data_structures/DOC_INDEX"
-# DIR_INVERTED_INDEX="../building_data_structures/INV_INDEX"
-
-# PATH_FINAL_LEXICON="lexicon.bin"
-# PATH_FINAL_DOC_IDS="doc_ids.bin"
-# PATH_FINAL_FREQ="freq.bin"
-# PATH_FINAL_BLOCK_DESCRIPTOR="block_descriptors.bin"
-# PATH_COLLECTION_STATISTICS="collection_statistics.txt"
-
-# PATH_FINAL_INVERTED_INDEX_DEBUG="inverted_index.txt"
-# PATH_FINAL_LEXICON_DEBUG="lexicon.txt"
-# PATH_FINAL_DOCUMENT_INDEX="document_index.txt"
-
-
-# In[4]:
-
-
-# file_lex=open(DIR_LEXICON+"/"+PATH_FINAL_LEXICON, 'rb') 
-# file_doc=open(DIR_INVERTED_INDEX+"/"+PATH_FINAL_DOC_IDS, 'rb') 
-# file_freq=open(DIR_INVERTED_INDEX+"/"+PATH_FINAL_FREQ, 'rb')
-# file_blocks=open(DIR_INVERTED_INDEX+"/"+PATH_FINAL_BLOCK_DESCRIPTOR, 'rb')
-
-
-
-# lexTerm=LexiconRow("",0)
-# lexTerm.read_lexicon_row_on_disk_from_opened_file(file_lex,0)
-
-# posting_reader=Posting_List_Reader(lexTerm,False,file_doc,file_freq,file_blocks)
-
-
-# In[9]:
-
-
-# for i in range (12):
-#     ris=next(posting_reader)
-#     print(ris)
-
-
-# In[5]:
-
-
-# for obj in posting_reader:
-#     print (obj)
-
-
-# In[6]:
-
-
-# posting_reader.get_current_posting()
-
-
-# In[6]:
-
-
-# file_lex.close()
-# file_doc.close()
-# file_freq.close()
-# file_blocks.close()
-
-
-# In[4]:
-
-
-# iterator=iter(posting_list)
-
-
-# In[7]:
-
-
-# a=next(iterator,None)
-# print(a)
-
-
-# In[10]:
-
-
-# import time
-
-# start_time = time.time()
-# #my_iter = iter(range(1000000))
-# my_iter=list(range(1000000))
-# for x in my_iter:
-#     x=x+1
-# end_time=time.time()
-
-# print("\n\n"+str(end_time-start_time))
-
-
-# In[9]:
-
-
-# range(100000)
-
-
-# In[3]:
-
-
-# aa=iter([Posting(1,2),Posting(2,3),Posting(3,4)])
-
-
-# In[9]:
-
-
-# next(aa)
-
-
-# In[11]:
-
-
-# getsizeof(list(range(1000000)))
-
-
-# In[12]:
-
-
-# # Get the byte occupancy
-# byte_size_list = sys.getsizeof(list(range(1000000)))
-# byte_size_iter = sys.getsizeof(iter(range(1000000)))
-
-
-# In[38]:
-
-
-# print(byte_size_list,byte_size_iter)
-
-
-# In[19]:
-
-
-# # Generate a list of 100,000 integers
-# integer_list = [i for i in range(10000000)]
-
-# # Specify the file name
-# file_name = "integer_list.txt"
-
-# # Open the file in write mode
-# with open(file_name, "w") as file:
-#     # Write each integer to a new line
-#     for integer in integer_list:
-#         file.write(f"{integer}\n")
-
-# print(f"List of 10 000 000 integers has been saved to {file_name}")
-
-
-# In[22]:
-
-
-# def read_integer_list(file_name):
-#     """Read a file containing integers (one per line) and return a list of integers."""
-#     print("PASSO DA QUI!!")
-#     with open(file_name, "r") as file:
-#         integer_list = [int(line.strip()) for line in file]
-#     print (integer_list[:10])
-#     print (len(integer_list))
-#     print (sys.getsizeof(integer_list))
-#     return integer_list
-
-
-# In[23]:
-
-
-# start_time = time.time()
-
-# lista_letta_da_disco=read_integer_list("integer_list.txt")
-
-# end_time=time.time()
-
-# print("Tempo necessario per popolamento al 100%\n"+str(end_time-start_time))
-
-# print("Dimensione in memoria:"+str(sys.getsizeof(lista_letta_da_disco)))
-
-# start_time = time.time()
-# elem=lista_letta_da_disco[56]
-# end_time=time.time()
-
-# print("Tempo di accesso al 57-esimo ["+str(elem)+"] elemento: "+str(end_time-start_time))
-
-
-# In[24]:
-
-
-# start_time = time.time()
-
-# lista_letta_da_disco=iter(read_integer_list("integer_list.txt"))
-
-# end_time=time.time()
-
-# print("Tempo necessario per popolamento al 100%\n "+str(end_time-start_time))
-
-# print("Dimensione in memoria:"+str(sys.getsizeof(lista_letta_da_disco)))
-
-# start_time = time.time()
-# for i in range(0,57):
-#     elem=next(lista_letta_da_disco)
-# end_time=time.time()
-    
-# print("Tempo di accesso al 57-esimo ["+str(elem)+"] elemento: "+str(end_time-start_time))
-
-
-# In[ ]:
-
-
-
 

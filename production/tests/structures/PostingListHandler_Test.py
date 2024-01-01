@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[19]:
+# In[1]:
 
 
-
+#import import_ipynb
 import os
 import shutil
 
@@ -22,13 +22,12 @@ from pre_processing.Decompress_collection import Collection_Reader
 
 # # Tests
 
-# In[20]:
+# In[2]:
 
 
 
 
-
-# In[21]:
+# In[3]:
 
 
 # Costants
@@ -57,22 +56,27 @@ PATH_FINAL_LEXICON_DEBUG="lexicon.txt"
 PATH_FINAL_DOCUMENT_INDEX_DEBUG="document_index.txt"
 
 
-# In[22]:
+# In[4]:
 
 
 test_documents=[]
 for i in range(0,10000):
     if (i%2==0):
-        test_documents.append("doc_"+str(i)+"\t"+" aaaaa ttt")
+        test_documents.append("doc"+str(i)+"\t"+" aaaaa ttt")
     else:
-        test_documents.append("doc_"+str(i)+"\t"+" bbbbb dddd")
+        test_documents.append("doc"+str(i)+"\t"+" bbbbb dddd")
         
 indexBuilder=IndexBuilder(True,False,Collection_Reader("",-1,-1,False,False,test_documents))
 indexBuilder.single_pass_in_memory_indexing(15000000)
 indexBuilder.index_merging()
 
 
-#Decomment for doing a manual testing.
+
+# In[6]:
+
+
+# import time
+# #Decomment for doing a manual testing.
 # lexicon_file_path=os.path.join(DIR_LEXICON, PATH_FINAL_LEXICON)
 # doc_id_file_path=os.path.join(DIR_INVERTED_INDEX, PATH_FINAL_DOC_IDS)
 # freq_file_path=os.path.join(DIR_INVERTED_INDEX, PATH_FINAL_FREQ)
@@ -84,17 +88,24 @@ indexBuilder.index_merging()
 # block_file=open(block_file_path,"rb")
 
 
-# term_bbb=LexiconRow("aaaaa",0)           
-# term_bbb.read_lexicon_row_on_disk_from_opened_file(lexicon_file,term_bbb.SIZE_LEXICON_ROW)
-
+# term_bbb=LexiconRow("the",0)           
+# term_bbb.read_lexicon_row_on_disk_from_opened_file(lexicon_file,term_bbb.SIZE_LEXICON_ROW*1062195)
+# print(term_bbb.term)
 # #bd=BlockDescriptor()
 # #block_desc=bd.read_block_descriptor_on_disk_from_opened_file(block_file,0)
 
 
 
-# pl_reader3=Posting_List_Reader(term_bbb,False,doc_id_file,freq_file,block_file)
+# pl_reader3=Posting_List_Reader(term_bbb,True,doc_id_file,freq_file,block_file)
+
+# start=time.time()
+# i=0
 # for elem in pl_reader3:
-#     print(elem)
+#     i+=1
+#     #print(elem)
+# end=time.time()
+# print(i)
+# print ("TOT TIME: "+str(end-start))
 
 # lexicon_file.close()
 # doc_id_file.close()
@@ -102,10 +113,10 @@ indexBuilder.index_merging()
 # block_file.close()
 
 
-# In[23]:
+# In[5]:
 
 
-
+#%%ipytest
 
 def test_Posting_List_Reader():
     
@@ -240,10 +251,10 @@ def test_Posting_List_Reader():
     
 
 
-# In[24]:
+# In[6]:
 
 
-
+#%%ipytest
 def test_Posting_List_Reader_NEXT_GEQ():
     
     
@@ -327,10 +338,10 @@ def test_Posting_List_Reader_NEXT_GEQ():
     block_file.close()
 
 
-# In[26]:
+# In[7]:
 
 
-
+#%%ipytest
 def test_fake_test_to_delete_folders():
     
     if os.path.exists(DIR_LEXICON):
