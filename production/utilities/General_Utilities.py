@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[4]:
+# In[1]:
 
 
 import psutil
@@ -10,7 +10,7 @@ import gzip
 from io import BytesIO
 
 
-# In[1]:
+# In[2]:
 
 
 def get_available_memory()-> int:
@@ -44,7 +44,7 @@ def get_memory_in_GB(num_bytes:int)->str:
     return str(round(num_bytes/(1024**3),2))+" GB"
 
 
-# In[ ]:
+# In[3]:
 
 
 def print_diff(string1:str, string2:str):
@@ -63,7 +63,7 @@ def print_diff(string1:str, string2:str):
 #print_diff(string1, string2)
 
 
-# In[2]:
+# In[4]:
 
 
 #Used for compression tests
@@ -86,7 +86,7 @@ def write_integers_to_file(filename, integer_list):
             file.write(str(integer))
 
 
-# In[ ]:
+# In[5]:
 
 
 def compress_list_of_strings_in_gzip_file(list_of_strings, output_file):
@@ -104,7 +104,7 @@ def compress_list_of_strings_in_gzip_file(list_of_strings, output_file):
             f.write(string_bytes)
 
 
-# In[ ]:
+# In[6]:
 
 
 class Singleton: 
@@ -125,7 +125,7 @@ def create_folder(folder_name: str) -> None :
         os.makedirs(folder_name)
 
 
-# In[16]:
+# In[7]:
 
 
 def read_words_from_file(file_path):
