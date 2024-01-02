@@ -1,1 +1,0 @@
-Da finire: replicare la struttura complessiva del progetto (per cartelle) e testare ciascuna funzione.
