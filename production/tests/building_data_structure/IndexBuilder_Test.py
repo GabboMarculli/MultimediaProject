@@ -22,7 +22,9 @@ from pre_processing.Decompress_collection import Collection_Reader
 # In[2]:
 
 
+# import ipytest
 
+# ipytest.autoconfig()
 
 
 # In[3]:
@@ -57,7 +59,7 @@ PATH_FINAL_DOCUMENT_INDEX_DEBUG="document_index.txt"
 # In[4]:
 
 
-#%%ipytest
+# %%ipytest
 
 #Test InvertedIndex and Posting datastructures
 
@@ -108,7 +110,7 @@ def test_posting_data_structure():
 # In[5]:
 
 
-#%%ipytest
+# %%ipytest
 
 #In this part I'm gonna test the local structure for saving an entire inverted index in main memory.
 #If this structure and its method is ok, then I can use it to simplfy further testing for complex documents.
@@ -172,7 +174,7 @@ def test_index_building():
 # In[6]:
 
 
-#%%ipytest
+# %%ipytest
 
 
 #The goal of this test is not to test if text_processing or compression is done, but just to consider
@@ -313,7 +315,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_creation_of_
 # In[7]:
 
 
-#%%ipytest
+# %%ipytest
 
 #Here using the previous data structure to check if using spimi + merging it obtains the same result.
 def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_index():
@@ -345,6 +347,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
     
     
     ind_read_from_disk=InvertedIndex()
+    ind_read_from_disk.clear_structure()
     
     i=0
     with open(DIR_INVERTED_INDEX+"\\"+PATH_FINAL_INVERTED_INDEX_DEBUG, "r") as file:
@@ -391,7 +394,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
 # In[8]:
 
 
-#%%ipytest
+# %%ipytest
 
 #Check if the datastructure contains the correct informations
 
@@ -419,6 +422,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
     
     
     ind_read_from_disk=InvertedIndex()
+    ind_read_from_disk.clear_structure()
     
     i=0
     with open(DIR_INVERTED_INDEX+"\\"+PATH_FINAL_INVERTED_INDEX_DEBUG, "r") as file:
@@ -525,7 +529,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
 # In[9]:
 
 
-#%%ipytest
+# %%ipytest
 
 #Test if it works with different block size.
 def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_index_with_different_blocks_size():
@@ -565,6 +569,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
         indexBuilder.index_merging()
 
         ind_read_from_disk=InvertedIndex()
+        ind_read_from_disk.clear_structure()
 
         i=0
         with open(DIR_INVERTED_INDEX+"\\"+PATH_FINAL_INVERTED_INDEX_DEBUG, "r") as file:
