@@ -22,9 +22,7 @@ from pre_processing.Decompress_collection import Collection_Reader
 # In[2]:
 
 
-# import ipytest
 
-# ipytest.autoconfig()
 
 
 # In[3]:
@@ -59,7 +57,7 @@ PATH_FINAL_DOCUMENT_INDEX_DEBUG="document_index.txt"
 # In[4]:
 
 
-# %%ipytest
+#%%ipytest
 
 #Test InvertedIndex and Posting datastructures
 
@@ -110,7 +108,7 @@ def test_posting_data_structure():
 # In[5]:
 
 
-# %%ipytest
+#%%ipytest
 
 #In this part I'm gonna test the local structure for saving an entire inverted index in main memory.
 #If this structure and its method is ok, then I can use it to simplfy further testing for complex documents.
@@ -174,7 +172,7 @@ def test_index_building():
 # In[6]:
 
 
-# %%ipytest
+#%%ipytest
 
 
 #The goal of this test is not to test if text_processing or compression is done, but just to consider
@@ -315,7 +313,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_creation_of_
 # In[7]:
 
 
-# %%ipytest
+#%%ipytest
 
 #Here using the previous data structure to check if using spimi + merging it obtains the same result.
 def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_index():
@@ -393,7 +391,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
 # In[8]:
 
 
-# %%ipytest
+#%%ipytest
 
 #Check if the datastructure contains the correct informations
 
@@ -411,6 +409,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
     
     #I care to reset it because it has been decided to be defined as singleton...
     docI=DocumentIndex()
+    docI.clear_structure()
     docI.number_of_documents=0
     docI.total_document_length=0
     
@@ -526,7 +525,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
 # In[9]:
 
 
-# %%ipytest
+#%%ipytest
 
 #Test if it works with different block size.
 def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_index_with_different_blocks_size():
@@ -550,6 +549,12 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
     "14\t laughter is contagious and brings joy is better for all"
 ]
 
+    #I care to reset it because it has been decided to be defined as singleton...
+    docI=DocumentIndex()
+    docI.clear_structure()
+    docI.number_of_documents=0
+    docI.total_document_length=0
+    
     
     
     #At each iteration it is aspected to obtain the same result for every possibile block size.
@@ -600,10 +605,4 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
     
     if os.path.exists(DIR_TEMP_FOLDER):
         shutil.rmtree(DIR_TEMP_FOLDER)
-
-
-# In[ ]:
-
-
-
 
