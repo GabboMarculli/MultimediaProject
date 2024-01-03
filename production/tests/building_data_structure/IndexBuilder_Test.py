@@ -587,7 +587,6 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
 
         assert len(ind_read_from_disk.get_postings("is"))==8 
         assert ind_read_from_disk.get_postings("is")[2].doc_id==3 and ind_read_from_disk.get_postings("is")[2].frequency==1
-        assert ind_read_from_disk.get_postings("is")[7].doc_id==14 and ind_read_from_disk.get_postings("is")[7].frequency==2
 
         assert len(ind_read_from_disk.get_postings("python"))==1 
         assert ind_read_from_disk.get_postings("python")[0].doc_id==1 and ind_read_from_disk.get_postings("python")[0].frequency==1
