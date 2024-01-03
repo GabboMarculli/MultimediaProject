@@ -116,7 +116,6 @@ class IndexBuilder:
         print ("Using: ")
         print ("Debug Mode :"+str(debug_mode))
         print ("Compression Mode :"+str(compression_mode))
-        print ("Nr of posting in each block descriptor: "+str(self.b_d_b.min_posting_list_size))
         print ("\n\n")
               
         
@@ -728,10 +727,10 @@ tot_doc=[
 # In[6]:
 
 
-#indexBuilder=IndexBuilder(True,True,Collection_Reader("",-1,-1,False,False,tot_doc))
-#invIndex=indexBuilder.build_in_memory_index(tot_doc)
-#indexBuilder.single_pass_in_memory_indexing(2220)
-#indexBuilder.index_merging()
+# indexBuilder=IndexBuilder(True,True,Collection_Reader("",-1,-1,False,False,tot_doc))
+# #invIndex=indexBuilder.build_in_memory_index(tot_doc)
+# indexBuilder.single_pass_in_memory_indexing(2220)
+# indexBuilder.index_merging()
 
 
 # In[8]:
