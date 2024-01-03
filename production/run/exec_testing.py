@@ -33,7 +33,7 @@ def main():
 	print("*************************************")
 	print("\n")
 	
-	folder_path="tests"
+	folder_path="../tests"
 	directories,files = list_files(folder_path)
 
 	if not files:
