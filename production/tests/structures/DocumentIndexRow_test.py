@@ -4,7 +4,7 @@
 # In[1]:
 
 
-
+#import import_ipynb
 import os
 import sys
 sys.path.append('../../')  # Go up two folders to the project root
@@ -16,13 +16,16 @@ from structures.DocumentIndexRow import DocumentIndexRow
 # In[2]:
 
 
+# import pytest
+# import ipytest
+
+# ipytest.autoconfig()
 
 
-
-# In[3]:
-
+# In[21]:
 
 
+#%%ipytest
 
 # TEST FOR "DOCUMENT INDEX ROW"
 def test_document_index_row_structure():
@@ -31,16 +34,16 @@ def test_document_index_row_structure():
     assert row.document_length == row.count_words("Hello world")
     assert row.doc_id == 5
     assert row.doc_no.strip()=="doc_no_5"
-    assert row.to_string() == "5 doc_no_5                       2"
+    assert row.to_string() == "doc_no_5                       2"
 
     row = DocumentIndexRow(6, "doc_no_6","Testing multiple words in a sentence.")
     assert row.document_length == 6
-    assert row.to_string() == "6 doc_no_6                       6"
+    assert row.to_string() == "doc_no_6                       6"
 
     # Empty document
     row = DocumentIndexRow(7,"doc_no_7", "")
     assert row.document_length == 0
-    assert row.to_string() == "7 doc_no_7                       0"
+    assert row.to_string() == "doc_no_7                       0"
 
     # "Doc_id" must be an integer
     try:
@@ -67,10 +70,10 @@ def test_document_index_row_structure():
     assert row.count_words("") == 0
 
 
-# In[4]:
+# In[20]:
 
 
-
+#%%ipytest
 
 def test_write_doc_index_row_on_disk():
     
@@ -92,13 +95,14 @@ def test_write_doc_index_row_on_disk():
         assert len(binaryData) == d_ind_row.SIZE_DOC_INDEX_ROW
         assert new_free_offset == d_ind_row.SIZE_DOC_INDEX_ROW
         
-        assert binaryData[0]   == 3
-        assert binaryData[40]   == 4
-        assert binaryData[9]== 111 #d
-        assert binaryData[10]==99 #o
-        assert binaryData[11]==95 #c
-        assert binaryData[12]==110 #_
-        assert binaryData[13]==111 #n
+        assert binaryData[0]== 100 #d
+        assert binaryData[1]==111 #o
+        assert binaryData[2]==99 #c
+        assert binaryData[3]==95 #_
+        assert binaryData[4]==110 #n
+        assert binaryData[5]==111 #o
+        assert binaryData[6]==95 #_
+        assert binaryData[7]==51 #3
         #....
         assert binaryData[20]==32 # white spaces
  
@@ -114,13 +118,14 @@ def test_write_doc_index_row_on_disk():
         
         assert len(binaryData)==d_ind_row.SIZE_DOC_INDEX_ROW*2
         
-        assert binaryData[0]   == 3
-        assert binaryData[40]   == 4
+        assert binaryData[0]== 100 #d
+        assert binaryData[1]==111 #o
+        assert binaryData[2]==99 #c
+        assert binaryData[3]==95 #_
+        assert binaryData[4]==110 #n
         
         assert new_free_offset==d_ind_row.SIZE_DOC_INDEX_ROW*2
         
-        assert binaryData[8] == 100
-        assert binaryData[12] == 110
         
     os.remove("prova.bin") 
 
@@ -139,15 +144,21 @@ def test_read_doc_index_row_on_disk():
     
     new_doc_index_row.read_debug("prova.bin",0)
     
-    assert new_doc_index_row.doc_id == 3
+    assert new_doc_index_row.doc_no == "doc_3"
     assert new_doc_index_row.document_length == 4
     
     new_doc_index_row.read_debug("prova.bin",new_offset)
     
-    assert new_doc_index_row.doc_id == 67
+    assert new_doc_index_row.doc_no == "doc_1"
     assert new_doc_index_row.document_length == 23
     
     assert new_doc_index_row.read_debug("prova.bin",800) == None
     
     os.remove("prova.bin") 
+
+
+# In[ ]:
+
+
+
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 import struct
@@ -18,11 +18,11 @@ import structures.DocumentIndex as doc_index
 
 
 class LexiconRow:
-    
-    
     MAX_TERM_LENGTH=30
     STR_SIZE_LEXICON_ROW='30s 2i 2f 2i 1f 3q 3i'
+    STR_SIZE_LEXICON_ROW_FINAL='30s 2i 2f 3q'
     SIZE_LEXICON_ROW=struct.calcsize(STR_SIZE_LEXICON_ROW)
+    SIZE_LEXICON_ROW_FINAL=struct.calcsize(STR_SIZE_LEXICON_ROW_FINAL)
     
     def __init__(self, term: str, dft: int=0, max_tf: int=0,idft: float=0, maxTFIDF:float=0, bm25dl:int=0, BM25Tf:int=0,
                  docidOffset:int=0,frequencyOffset:int=0,blockOffset:int=0,docidSize:int=0,frequencySize:int=0,numBlocks:int=1):
@@ -60,6 +60,11 @@ class LexiconRow:
         """ Used only for debug purposes."""
         return '\t'.join(["term","","","","dft","max_tf","idft","mTFIDF","BM25Tf","BM25Dl","mBM25","idOff","frOff","blkOff","docidSz","freqSz","numBlks"])
     
+    @staticmethod   
+    def to_string_header_FINAL()->str:
+        """ Used only for debug purposes."""
+        return '\t'.join(["term","","","","dft","numBlks","mTFIDF","mBM25","idOff","frOff","blkOff"])
+    
     def to_string(self)->str:
         """This function returns a string representation of a LexiconRow.
         
@@ -70,7 +75,20 @@ class LexiconRow:
                            "{:.3f}".format(self.maxTFIDF), str(self.BM25Tf), str(self.BM25Dl),"{:.3f}".format(self.maxBM25),
                            str(self.docidOffset), str(self.frequencyOffset), str(self.blockOffset),
                            str(self.docidSize), str(self.frequencySize),str(self.numBlocks)])
+        return string 
+    
+    def to_string_FINAL(self)->str:
+        """This function returns a string representation of a LexiconRow in a compact and final way.
+           Used for next part of Query Processing.
+        
+        Returns:
+            a human readable string representation of the Lexicon Row
+        """
+        string = '\t'.join([str(self.term) , str(self.dft) ,str(self.numBlocks),  
+                           "{:.3f}".format(self.maxTFIDF), "{:.3f}".format(self.maxBM25),
+                           str(self.docidOffset), str(self.frequencyOffset), str(self.blockOffset)])
         return string    
+    
     
     def write_lexicon_row_on_disk_to_opened_file(self,file:BinaryIO,offset:int=0)->int:
         """This function writes on a specific position of an opened file a lexicon row information.
@@ -94,6 +112,35 @@ class LexiconRow:
         file.write(binary_data)
             
         return self.SIZE_LEXICON_ROW+offset
+    
+    
+    def write_lexicon_row_on_disk_to_opened_file_FINAL_COMPACT_VERSION(self,file:BinaryIO,offset:int=0)->int:
+        """This function writes on a specific position of an opened file a lexicon row information.
+           Differently to the previous one it only save the needed information in the QueryProcessing part
+           in order to avoid to waste memory.
+           
+           Args:
+               file: the file to store the lexicon row
+               offset: the position inside the file to store the lexicon row
+           Returns:
+               the new offset free position after writing on the file
+        """
+        
+        file.seek(offset)
+
+        binary_data = struct.pack(self.STR_SIZE_LEXICON_ROW_FINAL, 
+                                      self.term.encode('utf-8'),
+                                      self.dft,self.numBlocks,
+                                      self.maxTFIDF,self.maxBM25,
+                                      self.docidOffset, self.frequencyOffset,self.blockOffset,
+                                      )
+        file.write(binary_data)
+            
+        return self.SIZE_LEXICON_ROW+offset
+    
+    
+    
+    
         
     def read_lexicon_row_on_disk_from_opened_file(self,file:BinaryIO,offset:int)->int:
         """This function reads a lexicon row informations in a specific position from an opened file.
@@ -147,6 +194,15 @@ class LexiconRow:
                file_debug: the file to store the lexicon row
         """
         file_debug.write(self.to_string()+"\n")
+        
+    def write_lexicon_row_on_disk_debug_mode_FINAL(self,file_debug:TextIO)->None:
+        """This function opens a file and writes on a specific position a lexicon row information.
+            This is used for debug and tests.
+        
+            Args:
+               file_debug: the file to store the lexicon row
+        """
+        file_debug.write(self.to_string_FINAL()+"\n")
     
     
     def write_lexicon_row_on_disk(self,file_path:str,offset:int=0)->int:
@@ -200,10 +256,4 @@ class LexiconRow:
         if newRatio > currentRatio:
             self.BM25Tf = term_freq
             self.BM25Dl = doc_len
-
-
-# In[ ]:
-
-
-
 

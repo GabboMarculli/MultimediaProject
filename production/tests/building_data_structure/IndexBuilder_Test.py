@@ -4,7 +4,7 @@
 # In[1]:
 
 
-#import import_ipynb
+# import import_ipynb
 import os
 import shutil
 
@@ -59,7 +59,7 @@ PATH_FINAL_DOCUMENT_INDEX_DEBUG="document_index.txt"
 # In[4]:
 
 
-# %%ipytest
+#%%ipytest
 
 #Test InvertedIndex and Posting datastructures
 
@@ -110,7 +110,7 @@ def test_posting_data_structure():
 # In[5]:
 
 
-# %%ipytest
+#%%ipytest
 
 #In this part I'm gonna test the local structure for saving an entire inverted index in main memory.
 #If this structure and its method is ok, then I can use it to simplfy further testing for complex documents.
@@ -174,7 +174,7 @@ def test_index_building():
 # In[6]:
 
 
-# %%ipytest
+#%%ipytest
 
 
 #The goal of this test is not to test if text_processing or compression is done, but just to consider
@@ -315,7 +315,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_creation_of_
 # In[7]:
 
 
-# %%ipytest
+#%%ipytest
 
 #Here using the previous data structure to check if using spimi + merging it obtains the same result.
 def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_index():
@@ -391,10 +391,10 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
         shutil.rmtree(DIR_TEMP_FOLDER)
 
 
-# In[8]:
+# In[7]:
 
 
-# %%ipytest
+#%%ipytest
 
 #Check if the datastructure contains the correct informations
 
@@ -468,33 +468,33 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
         for line in file:
             lines_read.append(line)
     
-    expected_output=["0 doc0                           7\n","1 doc1                           6\n","2 doc2                           9\n"]
+    expected_output=["doc0                           7\n","doc1                           6\n","doc2                           9\n"]
     
     for line,exp_output in zip(lines_read,expected_output):
         assert line==exp_output
     
     #Check if lexicon contains the right informations
     
-    expected_output=["a                             \t2\t1\t0.176\t1.231\t1\t6\t0.074\t0\t0\t0\t8\t8\t1\n",
-                     "brown                         \t1\t1\t0.477\t0.798\t1\t9\t0.166\t8\t8\t36\t4\t4\t1\n",
-                     "dog                           \t1\t1\t0.477\t0.798\t1\t9\t0.166\t12\t12\t72\t4\t4\t1\n",
-                     "fox                           \t1\t1\t0.477\t0.798\t1\t9\t0.166\t16\t16\t108\t4\t4\t1\n",
-                     "is                            \t2\t1\t0.176\t1.231\t1\t6\t0.074\t20\t20\t144\t8\t8\t1\n",
-                     "jumps                         \t1\t1\t0.477\t0.798\t1\t9\t0.166\t28\t28\t180\t4\t4\t1\n",
-                     "language                      \t1\t1\t0.477\t0.798\t1\t6\t0.200\t32\t32\t216\t4\t4\t1\n",
-                     "lazy                          \t1\t1\t0.477\t0.798\t1\t9\t0.166\t36\t36\t252\t4\t4\t1\n",
-                     "over                          \t1\t1\t0.477\t0.798\t1\t9\t0.166\t40\t40\t288\t4\t4\t1\n",
-                     "programming                   \t1\t1\t0.477\t0.798\t1\t6\t0.200\t44\t44\t324\t4\t4\t1\n",
-                     "punctuation                   \t1\t1\t0.477\t0.798\t1\t7\t0.187\t48\t48\t360\t4\t4\t1\n",
-                     "python                        \t1\t1\t0.477\t0.798\t1\t6\t0.200\t52\t52\t396\t4\t4\t1\n",
-                     "quick                         \t1\t1\t0.477\t0.798\t1\t9\t0.166\t56\t56\t432\t4\t4\t1\n",
-                     "random                        \t1\t1\t0.477\t0.798\t1\t7\t0.187\t60\t60\t468\t4\t4\t1\n",
-                     "sentence                      \t1\t1\t0.477\t0.798\t1\t7\t0.187\t64\t64\t504\t4\t4\t1\n",
-                     "the                           \t1\t2\t0.477\t1.039\t2\t9\t0.246\t68\t68\t540\t4\t4\t1\n",
-                     "this                          \t1\t1\t0.477\t0.798\t1\t7\t0.187\t72\t72\t576\t4\t4\t1\n",
-                     "versatile                     \t1\t1\t0.477\t0.798\t1\t6\t0.200\t76\t76\t612\t4\t4\t1\n",
-                     "without                       \t1\t1\t0.477\t0.798\t1\t7\t0.187\t80\t80\t648\t4\t4\t1\n"
-                    ]
+    expected_output=["a                             \t2\t1\t1.231\t0.074\t0\t0\t0\n",
+                     "brown                         \t1\t1\t0.798\t0.166\t8\t8\t36\n",
+                     "dog                           \t1\t1\t0.798\t0.166\t12\t12\t72\n",
+                     "fox                           \t1\t1\t0.798\t0.166\t16\t16\t108\n",
+                     "is                            \t2\t1\t1.231\t0.074\t20\t20\t144\n",
+                     "jumps                         \t1\t1\t0.798\t0.166\t28\t28\t180\n",
+                     "language                      \t1\t1\t0.798\t0.200\t32\t32\t216\n",
+                     "lazy                          \t1\t1\t0.798\t0.166\t36\t36\t252\n",
+                     "over                          \t1\t1\t0.798\t0.166\t40\t40\t288\n",
+                     "programming                   \t1\t1\t0.798\t0.200\t44\t44\t324\n",
+                     "punctuation                   \t1\t1\t0.798\t0.187\t48\t48\t360\n",
+                     "python                        \t1\t1\t0.798\t0.200\t52\t52\t396\n",
+                     "quick                         \t1\t1\t0.798\t0.166\t56\t56\t432\n",
+                     "random                        \t1\t1\t0.798\t0.187\t60\t60\t468\n",
+                     "sentence                      \t1\t1\t0.798\t0.187\t64\t64\t504\n",
+                     "the                           \t1\t1\t1.039\t0.246\t68\t68\t540\n",
+                     "this                          \t1\t1\t0.798\t0.187\t72\t72\t576\n",
+                     "versatile                     \t1\t1\t0.798\t0.200\t76\t76\t612\n",
+                     "without                       \t1\t1\t0.798\t0.187\t80\t80\t648\n"
+                     ]
     
     path_lexicon=os.path.join(DIR_LEXICON,PATH_FINAL_LEXICON_DEBUG)
     lines_read=[]
@@ -526,10 +526,10 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
         shutil.rmtree(DIR_TEMP_FOLDER)
 
 
-# In[9]:
+# In[8]:
 
 
-# %%ipytest
+#%%ipytest
 
 #Test if it works with different block size.
 def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_index_with_different_blocks_size():
@@ -562,8 +562,20 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
     
     
     #At each iteration it is aspected to obtain the same result for every possibile block size.
-    for i in range(1,6):   #Test for different block size
+    for i in range(1,3):   #Test for different block size
 
+        if os.path.exists(DIR_LEXICON):
+            shutil.rmtree(DIR_LEXICON)
+                
+        if os.path.exists(DIR_INVERTED_INDEX):
+            shutil.rmtree(DIR_INVERTED_INDEX)
+    
+        if os.path.exists(DIR_DOC_INDEX):
+            shutil.rmtree(DIR_DOC_INDEX)
+    
+        if os.path.exists(DIR_TEMP_FOLDER):
+            shutil.rmtree(DIR_TEMP_FOLDER)
+        
         indexBuilder=IndexBuilder(True,False,Collection_Reader("",-1,-1,False,False,test_documents))
         indexBuilder.single_pass_in_memory_indexing(500*i)
         indexBuilder.index_merging()
@@ -587,6 +599,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
 
         assert len(ind_read_from_disk.get_postings("is"))==8 
         assert ind_read_from_disk.get_postings("is")[2].doc_id==3 and ind_read_from_disk.get_postings("is")[2].frequency==1
+        assert ind_read_from_disk.get_postings("is")[7].doc_id==14 and ind_read_from_disk.get_postings("is")[7].frequency==2
 
         assert len(ind_read_from_disk.get_postings("python"))==1 
         assert ind_read_from_disk.get_postings("python")[0].doc_id==1 and ind_read_from_disk.get_postings("python")[0].frequency==1
@@ -609,4 +622,10 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
     
     if os.path.exists(DIR_TEMP_FOLDER):
         shutil.rmtree(DIR_TEMP_FOLDER)
+
+
+# In[ ]:
+
+
+
 

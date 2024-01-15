@@ -19,7 +19,7 @@ from structures.LexiconRow import LexiconRow
 # In[3]:
 
 
-DIR_DOC_INDEX="../building_data_structures/DOC_INDEX"
+DIR_DOC_INDEX="../DOC_INDEX"
 PATH_DOC_INDEX = "document_index.bin"
 
 class Scoring:

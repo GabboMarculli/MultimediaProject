@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 import struct
 from typing import BinaryIO
+
+
+# In[3]:
 
 
 # In[6]:
@@ -13,7 +16,7 @@ from typing import BinaryIO
 
 class DocumentIndexRow:
 
-    STR_SIZE_DOC_INDEX_ROW = 'q 30s i'
+    STR_SIZE_DOC_INDEX_ROW = '30s i'
     SIZE_DOC_INDEX_ROW = struct.calcsize(STR_SIZE_DOC_INDEX_ROW)
     
     def __init__(self, doc_id:int, doc_no: str, text: str) -> None:
@@ -61,28 +64,8 @@ class DocumentIndexRow:
          Returns:
             str: String representation of the row.
         """
-        string = ' '.join([str(self.doc_id) , str(self.doc_no), str(self.document_length)])
+        string = ' '.join([str(self.doc_no), str(self.document_length)])
         return string  
-
-    def write_doc_index_row_on_disk(self, file:BinaryIO, offset:int = 0):
-        """
-        Write the row data to a binary file on disk.
-
-        Parameters:
-            file (BinaryIO): Binary file object.
-            offset (int): Offset in the file.
-
-        Returns:
-            int: Updated offset after writing the data.
-        """
-        file.seek(offset)
-
-        binary_data = struct.pack(self.STR_SIZE_DOC_INDEX_ROW, self.doc_id,self.doc_no.encode('utf-8'),
-                                  self.document_length)
-
-        file.write(binary_data)
-
-        return self.SIZE_DOC_INDEX_ROW + offset
 
     def read_doc_index_row_on_disk(self, file:BinaryIO, offset:int):
         """
@@ -101,8 +84,7 @@ class DocumentIndexRow:
         if(not bytesLetti):
             return None
         try: 
-            doc_id, doc_no, doc_length = struct.unpack(self.STR_SIZE_DOC_INDEX_ROW, bytesLetti)
-            self.doc_id = doc_id
+            doc_no, doc_length = struct.unpack(self.STR_SIZE_DOC_INDEX_ROW, bytesLetti)
             self.doc_no=str(doc_no.decode('utf-8')).strip()
             self.document_length = doc_length
             
@@ -110,6 +92,28 @@ class DocumentIndexRow:
             print(f"Error unpacking data: {e}")
 
         return offset + self.SIZE_DOC_INDEX_ROW
+
+
+
+    def write_doc_index_row_on_disk(self, file:BinaryIO, offset:int = 0):
+        """
+        Write the row data to a binary file on disk.
+
+        Parameters:
+            file (BinaryIO): Binary file object.
+            offset (int): Offset in the file.
+
+        Returns:
+            int: Updated offset after writing the data.
+        """
+        file.seek(offset)
+
+        binary_data = struct.pack(self.STR_SIZE_DOC_INDEX_ROW,self.doc_no.encode('utf-8'),
+                                  self.document_length)
+
+        file.write(binary_data)
+
+        return self.SIZE_DOC_INDEX_ROW + offset
 
 
 
@@ -154,16 +158,4 @@ def test_doc_index_row_pack():
     assert lr.document_length == 2  # length of "hello HELLO"
 
 #test_doc_index_row_pack()
-
-
-# In[5]:
-
-
-
-
-
-# In[ ]:
-
-
-
 

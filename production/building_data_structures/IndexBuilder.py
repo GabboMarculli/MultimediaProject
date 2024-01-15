@@ -217,7 +217,7 @@ class IndexBuilder:
         if (self.debug_mode):
             self.file_Final_InvertedIndex_Debug=open(DIR_INVERTED_INDEX+"/"+PATH_FINAL_INVERTED_INDEX_DEBUG,'a')
             self.file_Final_Lexicon_Debug=open(DIR_LEXICON+"/"+PATH_FINAL_LEXICON_DEBUG,'a')
-            self.file_Final_Lexicon_Debug.write(LexiconRow.to_string_header()+"\n")
+            self.file_Final_Lexicon_Debug.write(LexiconRow.to_string_header_FINAL()+"\n")
         
         
     def __close_files_for_merging_operation(self)->None:
@@ -616,19 +616,13 @@ class IndexBuilder:
                 new_Lexicon_Def.maxTFIDF=self.scorer.compute_TFIDF(MAX_TF,new_Lexicon_Def.idft)
                 
                 new_Lexicon_Def.maxBM25=self.scorer.compute_term_upper_bound_bm25(new_Lexicon_Def)
-                if (min_term=='a'.ljust(30)):
-                    print(new_Lexicon_Def.maxBM25)
-                    print(new_Lexicon_Def.BM25Dl)
-                    print(new_Lexicon_Def.BM25Tf)
-                    
-
                 new_Lexicon_Def.docidSize=(current_offset_doc_ids-new_Lexicon_Def.docidOffset)
                 new_Lexicon_Def.frequencySize=(current_offset_freq-new_Lexicon_Def.frequencyOffset)
                 
                 #Save all the information related to the term just elaborated to disk.
                 if (self.debug_mode):
-                    new_Lexicon_Def.write_lexicon_row_on_disk_debug_mode(self.file_Final_Lexicon_Debug)
-                current_offset_lexicon=new_Lexicon_Def.write_lexicon_row_on_disk_to_opened_file(self.file_Final_Lexicon,current_offset_lexicon)
+                    new_Lexicon_Def.write_lexicon_row_on_disk_debug_mode_FINAL(self.file_Final_Lexicon_Debug)
+                current_offset_lexicon=new_Lexicon_Def.write_lexicon_row_on_disk_to_opened_file_FINAL_COMPACT_VERSION(self.file_Final_Lexicon,current_offset_lexicon)
                 
                 number_of_distinct_terms+=1
                 
@@ -724,11 +718,11 @@ tot_doc=[
 #indexBuilder.build_block_sort_base_indexing(tot_doc,"complete_inverted_index",2220,False,False)
 
 
-# In[6]:
+# In[5]:
 
 
 # indexBuilder=IndexBuilder(True,True,Collection_Reader("",-1,-1,False,False,tot_doc))
-# #invIndex=indexBuilder.build_in_memory_index(tot_doc)
+# # #invIndex=indexBuilder.build_in_memory_index(tot_doc)
 # indexBuilder.single_pass_in_memory_indexing(2220)
 # indexBuilder.index_merging()
 

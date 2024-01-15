@@ -36,7 +36,7 @@ DIR_INVERTED_INDEX="INV_INDEX"
 # In[3]:
 
 
-#%%ipytest
+# %%ipytest
 
 def test_lexicon_add_term():
     capacity = 5
