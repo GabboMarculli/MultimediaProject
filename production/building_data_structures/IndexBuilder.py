@@ -613,7 +613,10 @@ class IndexBuilder:
                 
                 new_Lexicon_Def.idft=self.scorer.compute_IDFT(tot_posting)
                 new_Lexicon_Def.max_tf=MAX_TF
-                new_Lexicon_Def.maxTFIDF=self.scorer.compute_TFIDF(MAX_TF,new_Lexicon_Def.idft)
+                
+                new_Lexicon_Def.maxTFIDF=self.scorer.compute_TFIDF(MAX_TF,tot_posting)
+                print(new_Lexicon_Def.maxTFIDF)
+                
                 
                 new_Lexicon_Def.maxBM25=self.scorer.compute_term_upper_bound_bm25(new_Lexicon_Def)
                 new_Lexicon_Def.docidSize=(current_offset_doc_ids-new_Lexicon_Def.docidOffset)
@@ -714,6 +717,23 @@ tot_doc=[
 ]
 
 
+tot_doc=[
+    "0     Game of Thrones is the best tv series I have ever seen. The game is all around the throne and the tv show has the best charaters and interpreters. It is a beautiful tv program.",
+    "1     Football is a sport game on which players have to kick the ball with foot and score a point in the opposite area. It is one of the famous game in the world but most in America. It is used in tv.",
+    "2     Basketball and Football are two of the most famous sport pratices in all countries. The people enjoi to watch them in tv. America is a great fan of sport. America is also the fattest country in the world.",
+    "3     The dog is an animal more robust than a cat. A cat is more irriqueit and less dangerous than a dog. The two animal are lot common in all the families and between people.",
+    "4     The wild countrieside is full of animal, like tiger, hourse, dog, cat, but also small animal like butterfly or apes. This is tipical of America. You can not see in tv. Tv series is opposite to countrieside.",
+    "5     The hisory teachs take people always commit errors to obtain what they wants. Thrones, power, money or countries are the most popular and typical object of desire. People.",
+    "6     Italy has lot of regions then America. Tuscany is very wild, it has mountains, lake, sea, gardens. America instead is reach of mountains but not so many landscape like sea. People like more america the Italy. ",
+    "7     The food is good but the basketball is better. This is the tipycal way of think of america. Tv series are for people instead the Football is for italian. Dog is the best animal in the world.", 
+    "8     The people in the world are good but america has more people than italy. Animal are less in America then Italy.",
+    "9     America tv series are more followed by people. ",
+    "10    America people is often fat because of the food."
+]
+
+
+
+
 #indexBuilder=IndexBuilder()
 #indexBuilder.build_block_sort_base_indexing(tot_doc,"complete_inverted_index",2220,False,False)
 
@@ -721,10 +741,10 @@ tot_doc=[
 # In[5]:
 
 
-# indexBuilder=IndexBuilder(True,True,Collection_Reader("",-1,-1,False,False,tot_doc))
+#indexBuilder=IndexBuilder(True,False,Collection_Reader("",-1,-1,False,False,tot_doc))
 # # #invIndex=indexBuilder.build_in_memory_index(tot_doc)
-# indexBuilder.single_pass_in_memory_indexing(2220)
-# indexBuilder.index_merging()
+#indexBuilder.single_pass_in_memory_indexing(2220)
+#indexBuilder.index_merging()
 
 
 # In[8]:

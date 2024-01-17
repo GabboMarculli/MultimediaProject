@@ -4,7 +4,7 @@
 # In[1]:
 
 
-# import import_ipynb
+#import import_ipynb
 import os
 import shutil
 
@@ -22,9 +22,9 @@ from pre_processing.Decompress_collection import Collection_Reader
 # In[2]:
 
 
-# import ipytest
+#import ipytest
 
-# ipytest.autoconfig()
+#ipytest.autoconfig()
 
 
 # In[3]:
@@ -107,7 +107,7 @@ def test_posting_data_structure():
     assert posting_2.frequency==45
 
 
-# In[5]:
+# In[6]:
 
 
 #%%ipytest
@@ -171,7 +171,7 @@ def test_index_building():
     
 
 
-# In[6]:
+# In[7]:
 
 
 #%%ipytest
@@ -312,7 +312,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_creation_of_
     
 
 
-# In[7]:
+# In[8]:
 
 
 #%%ipytest
@@ -391,7 +391,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
         shutil.rmtree(DIR_TEMP_FOLDER)
 
 
-# In[7]:
+# In[14]:
 
 
 #%%ipytest
@@ -475,25 +475,25 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
     
     #Check if lexicon contains the right informations
     
-    expected_output=["a                             \t2\t1\t1.231\t0.074\t0\t0\t0\n",
-                     "brown                         \t1\t1\t0.798\t0.166\t8\t8\t36\n",
-                     "dog                           \t1\t1\t0.798\t0.166\t12\t12\t72\n",
-                     "fox                           \t1\t1\t0.798\t0.166\t16\t16\t108\n",
-                     "is                            \t2\t1\t1.231\t0.074\t20\t20\t144\n",
-                     "jumps                         \t1\t1\t0.798\t0.166\t28\t28\t180\n",
-                     "language                      \t1\t1\t0.798\t0.200\t32\t32\t216\n",
-                     "lazy                          \t1\t1\t0.798\t0.166\t36\t36\t252\n",
-                     "over                          \t1\t1\t0.798\t0.166\t40\t40\t288\n",
-                     "programming                   \t1\t1\t0.798\t0.200\t44\t44\t324\n",
-                     "punctuation                   \t1\t1\t0.798\t0.187\t48\t48\t360\n",
-                     "python                        \t1\t1\t0.798\t0.200\t52\t52\t396\n",
-                     "quick                         \t1\t1\t0.798\t0.166\t56\t56\t432\n",
-                     "random                        \t1\t1\t0.798\t0.187\t60\t60\t468\n",
-                     "sentence                      \t1\t1\t0.798\t0.187\t64\t64\t504\n",
-                     "the                           \t1\t1\t1.039\t0.246\t68\t68\t540\n",
-                     "this                          \t1\t1\t0.798\t0.187\t72\t72\t576\n",
-                     "versatile                     \t1\t1\t0.798\t0.200\t76\t76\t612\n",
-                     "without                       \t1\t1\t0.798\t0.187\t80\t80\t648\n"
+    expected_output=["a                             \t2\t1\t0.176\t0.074\t0\t0\t0\n",
+                     "brown                         \t1\t1\t0.477\t0.166\t8\t8\t36\n",
+                     "dog                           \t1\t1\t0.477\t0.166\t12\t12\t72\n",
+                     "fox                           \t1\t1\t0.477\t0.166\t16\t16\t108\n",
+                     "is                            \t2\t1\t0.176\t0.074\t20\t20\t144\n",
+                     "jumps                         \t1\t1\t0.477\t0.166\t28\t28\t180\n",
+                     "language                      \t1\t1\t0.477\t0.200\t32\t32\t216\n",
+                     "lazy                          \t1\t1\t0.477\t0.166\t36\t36\t252\n",
+                     "over                          \t1\t1\t0.477\t0.166\t40\t40\t288\n",
+                     "programming                   \t1\t1\t0.477\t0.200\t44\t44\t324\n",
+                     "punctuation                   \t1\t1\t0.477\t0.187\t48\t48\t360\n",
+                     "python                        \t1\t1\t0.477\t0.200\t52\t52\t396\n",
+                     "quick                         \t1\t1\t0.477\t0.166\t56\t56\t432\n",
+                     "random                        \t1\t1\t0.477\t0.187\t60\t60\t468\n",
+                     "sentence                      \t1\t1\t0.477\t0.187\t64\t64\t504\n",
+                     "the                           \t1\t1\t0.621\t0.246\t68\t68\t540\n",
+                     "this                          \t1\t1\t0.477\t0.187\t72\t72\t576\n",
+                     "versatile                     \t1\t1\t0.477\t0.200\t76\t76\t612\n",
+                     "without                       \t1\t1\t0.477\t0.187\t80\t80\t648\n"
                      ]
     
     path_lexicon=os.path.join(DIR_LEXICON,PATH_FINAL_LEXICON_DEBUG)
@@ -526,7 +526,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
         shutil.rmtree(DIR_TEMP_FOLDER)
 
 
-# In[8]:
+# In[9]:
 
 
 #%%ipytest
@@ -562,7 +562,7 @@ def test_correctness_of_spimi_plus_merging_with_multiple_block_size_content_of_i
     
     
     #At each iteration it is aspected to obtain the same result for every possibile block size.
-    for i in range(1,3):   #Test for different block size
+    for i in range(1,6):   #Test for different block size
 
         if os.path.exists(DIR_LEXICON):
             shutil.rmtree(DIR_LEXICON)
