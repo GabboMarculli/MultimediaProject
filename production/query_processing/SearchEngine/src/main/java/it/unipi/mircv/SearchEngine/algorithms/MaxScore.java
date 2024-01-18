@@ -17,6 +17,9 @@ import it.unipi.mircv.SearchEngine.utilities.Scoring.ObjScore;
 
 /**
  * The MaxScore class is responsible for scoring and retrieving top-k documents based on the given scoring function and tokens.
+ * 
+ * @author Gabriele
+ *
  */
 public class MaxScore {
 

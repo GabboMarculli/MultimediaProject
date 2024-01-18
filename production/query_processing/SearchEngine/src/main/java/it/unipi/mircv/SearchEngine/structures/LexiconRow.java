@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 /**
  * This class is used to represent the information inside the Lexicon.
  * 
- * To finish.
+ * 
  * @author Davide
  *
  */
@@ -16,7 +16,6 @@ public class LexiconRow{
 	
 	
 	public static int LEXICON_ROW_SIZE=72;
-	
 	
 	private String term;
 	private int dft;
@@ -27,13 +26,27 @@ public class LexiconRow{
 	private long blockOffset;
 	private int numBlocks;
 	
-	
+	/**
+	 * Default constructor method.
+	 */
 	public LexiconRow() {
 		this.term ="";
 	}
 
 	
-	
+	/**
+	 * Constructor method:
+	 * 
+	 * 
+	 * @param term - the term to store inside the lexicon
+	 * @param dft - the document frequency of the term
+	 * @param maxTFIDF - the TFIDF term upperbound.
+	 * @param maxBM25 - the BM25 term upperbound.
+	 * @param docidOffset - the starting offset of the docId file
+	 * @param frequencyOffset - the starting offset of the freqs file
+	 * @param blockOffset - the starting offset of the blocks file
+	 * @param numBlocks - the total number of blocks of the term
+	 */
 	public LexiconRow(String term, int dft, float maxTFIDF, float maxBM25, long docidOffset, long frequencyOffset,
 			long blockOffset, int numBlocks) {
 		super();
